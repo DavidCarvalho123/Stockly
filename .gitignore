@@ -1,1 +1,3 @@
 Stockly-Server/.vs/*
+Stockly-Client/.expo/*
+Stockly-Client/node_modules/*
