@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Stockly_Server.Models;
 
 namespace Stockly_Server.Controllers
 {
