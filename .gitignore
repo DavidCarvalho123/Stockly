@@ -1,8 +1,8 @@
 Stockly-Server/.vs/*
 Stockly-Client/.expo/*
 Stockly-Client/node_modules/*
-/Stockly-Server/bin/Debug/net8.0
-/Stockly-Server/obj/Debug/net8.0
+/Stockly-Server/bin/Debug/*
+/Stockly-Server/obj/Debug/*
 /Stockly-Server/obj/Debug/net8.0/Stockly-Server.AssemblyInfo.cs
 /Stockly-Server/obj/Debug/net8.0/Stockly-Server.AssemblyInfoInputs.cache
 /Stockly-Server/obj/project.assets.json
