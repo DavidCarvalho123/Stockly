@@ -1,15 +1,13 @@
 import { Stack } from "expo-router";
 
-export default function RootLayout() {
+export default function HomeLayout() {
   const isLoggedIn = true // para substituir com lógica de login
 
   return (
     <Stack screenOptions={{headerShown: false}}>
       <Stack.Protected guard={isLoggedIn}>
-        <Stack.Screen name="(home)" />
+        <Stack.Screen name="index"/>
       </Stack.Protected>
-      
-      <Stack.Screen name="login"  />
     </Stack>
     );
 }

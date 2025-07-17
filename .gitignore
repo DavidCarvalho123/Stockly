@@ -5,3 +5,5 @@ Stockly-Client/node_modules/*
 /Stockly-Server/obj/Debug/net8.0
 /Stockly-Server/obj/Debug/net8.0/Stockly-Server.AssemblyInfo.cs
 /Stockly-Server/obj/Debug/net8.0/Stockly-Server.AssemblyInfoInputs.cache
+/Stockly-Server/obj/project.assets.json
+/Stockly-Server/obj/project.assets.json
