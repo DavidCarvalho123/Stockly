@@ -18,5 +18,17 @@ export default StyleSheet.create({
         textAlign: 'center',
         fontSize: 14,
         fontWeight:'400'
+    },
+    mobileButtonPrimary: {
+        backgroundColor: '#ffffff',
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderRadius: 30,
+        width: '100%'
+    },
+    mobileTextButtonPrimary:{
+        textAlign: 'center',
+        fontSize: 14,
+        fontWeight:'400'
     }
 });

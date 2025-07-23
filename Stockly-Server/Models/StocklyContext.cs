@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Stockly_Server.Models;
 
-public partial class StocklyContext : DbContext
+public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int>
 {
     public StocklyContext()
     {
@@ -37,18 +39,34 @@ public partial class StocklyContext : DbContext
 
     public virtual DbSet<Utilizadore> Utilizadores { get; set; }
 
+
+    public DbSet<IdentityUserClaim<int>> UserClaims { get; set; }
+    public DbSet<IdentityUserRole<int>> UserRoles { get; set; }
+    public DbSet<IdentityUserLogin<int>> UserLogins { get; set; }
+    public DbSet<IdentityRoleClaim<int>> RoleClaims { get; set; }
+    public DbSet<IdentityUserToken<int>> UserTokens { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseMySQL("server=jdbc:mariadb:User=root;Password=root;Database=Stockly;Server=localhost;Port=3306;");
+        => optionsBuilder.UseMySQL("Uid=root;Pwd=root;Database=Stockly;Server=localhost;Port=3306;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("UserClaims");
+        modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("UserLogins");
+        modelBuilder.Entity<IdentityUserToken<int>>().ToTable("UserTokens");
+        modelBuilder.Entity<IdentityRoleClaim<int>>().ToTable("RoleClaims");
+        modelBuilder.Entity<IdentityUserRole<int>>().ToTable("UserRoles");
+
         modelBuilder.Entity<Acesso>(entity =>
         {
+            entity.ToTable("acessos");
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.Property(e => e.Id).HasColumnType("int(11)");
-            entity.Property(e => e.Nome).HasMaxLength(20);
+            entity.Property(e => e.Name).HasMaxLength(20);
         });
 
         modelBuilder.Entity<Departamento>(entity =>
@@ -327,6 +345,7 @@ public partial class StocklyContext : DbContext
 
         modelBuilder.Entity<Utilizadore>(entity =>
         {
+            entity.ToTable("utilizadores");
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
             entity.HasIndex(e => e.IdAcesso, "IdAcesso");

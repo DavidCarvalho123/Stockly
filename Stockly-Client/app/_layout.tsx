@@ -5,6 +5,7 @@ export default function RootLayout() {
 
   return (
     <Stack screenOptions={{headerShown: false}}>
+      
       <Stack.Protected guard={isLoggedIn}>
         <Stack.Screen name="(home)" />
       </Stack.Protected>

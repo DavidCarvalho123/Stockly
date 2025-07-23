@@ -1,9 +1,10 @@
+import { Text } from "react-native";
 
 const Inventario:React.FC = () => {
 
     return ( 
         <>
-            inventario body
+            <Text style={{color:'#00000'}}>inventario body</Text>
         </>
     );
 }

@@ -1,19 +1,18 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace Stockly_Server.Models;
 
-public partial class Utilizadore
+public partial class Utilizadore : IdentityUser<int>
 {
-    public int Id { get; set; }
-
+    public Utilizadore() : base() { }
     public string? Nome { get; set; }
 
     public string? NomeUtilizador { get; set; }
 
     public string? Password { get; set; }
 
-    public string? Email { get; set; }
 
     public string? Cargo { get; set; }
 

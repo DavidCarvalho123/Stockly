@@ -10,10 +10,6 @@ interface Props {
 
 const Sidebar: React.FC<Props> = ({ parentStyle, updateComponent }) => {
 
-    const pressedButtonNav = (component: string) => {
-        updateComponent(component)
-    }
-
     return(
         <>
             <View style={[styles.container, parentStyle]}>
