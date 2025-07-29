@@ -12,7 +12,7 @@ namespace Stockly_Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Authorize]
     public class TokenController : ControllerBase
     {
         private readonly UserManager<Utilizadore> _userManager;
@@ -24,7 +24,9 @@ namespace Stockly_Server.Controllers
             _signInManager = signInManager;
             _configuration = configuration;
         }
+
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CregisterForm model)
         {
             var user = new Utilizadore { NomeUtilizador = model.NomeUtilizador, UserName = model.NomeUtilizador, Nome = model.Nome, Email = model.Email, Cargo = model.Cargo, IdLocalizacao = model.IdLocalizacao, IdDepartamento = model.IdDepartamento, IdAcesso = model.IdAcesso, IsLdap = model.IsLdap };
@@ -36,6 +38,7 @@ namespace Stockly_Server.Controllers
             return BadRequest(result.Errors);
         }
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] CloginForm model)
         {
             var usert = await _userManager.FindByNameAsync(model.Username);
@@ -48,6 +51,12 @@ namespace Stockly_Server.Controllers
                 return Ok(new { token });
             }
             return Unauthorized();
+        }
+
+        [HttpGet("testConnection")]
+        public async Task<IActionResult> TestConnection()
+        {
+            return Ok();
         }
 
         private string GenerateJwtToken(Utilizadore user)

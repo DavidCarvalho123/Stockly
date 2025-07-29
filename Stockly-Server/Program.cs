@@ -78,4 +78,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run("https://localhost:8082");
+app.Run();
