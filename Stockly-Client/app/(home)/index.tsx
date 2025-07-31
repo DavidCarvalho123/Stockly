@@ -4,7 +4,6 @@ import { AvailableComponents } from "@/libs/AvailableComponents";
 import { useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { ClickOutsideProvider } from 'react-native-click-outside';
-import { SafeAreaView } from "react-native-safe-area-context";
 
 
 const index = () => {
@@ -32,9 +31,7 @@ const index = () => {
         return (
             <ClickOutsideProvider>
                 <Navbar componentTitle="" updateComponent={updateCurrentMainComponent} />
-                <SafeAreaView>
                     {AvailableComponents[MainComponentTitle]}
-                </SafeAreaView>
             </ClickOutsideProvider>
         )
     }
