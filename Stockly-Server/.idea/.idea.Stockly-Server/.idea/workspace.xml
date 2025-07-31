@@ -9,14 +9,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07885719-1068-4dfe-9065-c0b590a6a15e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Controllers/WeatherForecastController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/WeatherForecastController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Stockly-Server.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Stockly-Server.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Stockly-Server.assets.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Stockly-Server.assets.cache" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Debug/net8.0/Stockly-Server.csproj.AssemblyReference.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Debug/net8.0/Stockly-Server.csproj.AssemblyReference.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/components/Produtos/ManutencaoProdutos.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/components/Produtos/ManutencaoProdutos.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/libs/Requests.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/libs/Requests.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/libs/Style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/libs/Style.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Stockly-Server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stockly-Server/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.dgspec.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.props" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.targets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/project.assets.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.assets.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.nuget.cache" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -36,10 +38,10 @@
     <setting file="file://$PROJECT_DIR$/Models/Fornecedore.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Models/StocklyContext.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
-  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
-  <component name="KubernetesApiProvider"><![CDATA[{
-  "isMigrated": true
-}]]></component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -107,6 +109,16 @@
       <workItem from="1750875327664" duration="1740000" />
       <workItem from="1751925692510" duration="698000" />
       <workItem from="1752085520774" duration="3116000" />
+      <workItem from="1753381456169" duration="2674000" />
+      <workItem from="1753391637488" duration="311000" />
+      <workItem from="1753392623503" duration="1275000" />
+      <workItem from="1753440802746" duration="148000" />
+      <workItem from="1753444891398" duration="28000" />
+      <workItem from="1753624203175" duration="3488000" />
+      <workItem from="1753653325238" duration="343000" />
+      <workItem from="1753908867749" duration="1810000" />
+      <workItem from="1753917399310" duration="56000" />
+      <workItem from="1753978331617" duration="2553000" />
     </task>
     <servers />
   </component>

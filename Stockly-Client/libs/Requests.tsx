@@ -1,6 +1,6 @@
 import { LoginForm } from "@/models/Login";
 
-const baseUrl = 'https://localhost:8082/api/'
+const baseUrl = 'http://localhost:8082/api/'
 
 // JWT-based login
 
