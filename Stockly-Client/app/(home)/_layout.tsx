@@ -1,13 +1,23 @@
-import { Stack } from "expo-router";
+import { AuthContext } from "@/libs/AuthContext";
+import { Redirect, Stack } from "expo-router";
+import { useContext } from "react";
 
 export default function HomeLayout() {
-  const isLoggedIn = true // para substituir com lógica de login
+  const authState = useContext(AuthContext)
+  
+  if(!authState.isReady){
+    return null;
+  }
 
+  if(!authState.isLoggedIn){
+    return <Redirect href="/login"/>;
+  }
+  
   return (
     <Stack screenOptions={{headerShown: false}}>
-      <Stack.Protected guard={isLoggedIn}>
+      
         <Stack.Screen name="index"/>
-      </Stack.Protected>
+      
     </Stack>
     );
 }

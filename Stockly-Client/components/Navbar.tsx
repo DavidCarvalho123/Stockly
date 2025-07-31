@@ -79,7 +79,7 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
                 </View>
 
                 <View style={styles.buttonContainer}>
-                    <Pressable style={Style.mobileButtonPrimary} >
+                    <Pressable style={Style.mobileButtonPrimary} onPress={updateComponent("Representação 3D")}>
                         <Text style={Style.mobileTextButtonPrimary}>Pesquisa</Text>
                     </Pressable>
                 </View>
