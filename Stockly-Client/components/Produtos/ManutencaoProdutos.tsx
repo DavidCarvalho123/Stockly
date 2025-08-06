@@ -1,13 +1,20 @@
 import { Colours } from "@/libs/Constants";
 import { GetAllPoducts } from "@/libs/Requests";
+import Style from "@/libs/Style";
 import { ProdutosManutencao } from "@/models/Produtos";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView} from 'react-native-safe-area-context';
+import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
+
+
+
 
 const ProdutosHeaders = ['EAN', 'Nome', 'Departamento', 'Unidade', 'Preço Venda', 'IVA', 'Ativo']
 
 const ManutencaoProdutos:React.FC = () => {
     const [Products, setProducts] = useState<ProdutosManutencao[]>();
+    const [modalVisible, setModalVisible] = useState(false);
     
     useEffect(() => {
         async function fetchData() {
@@ -19,16 +26,29 @@ const ManutencaoProdutos:React.FC = () => {
         fetchData();
     }, [])
 
+const viewModal = () => {
+    console.log("habemos button");
+    setModalVisible(true);
+}
+
     return ( 
-        <View style={styles.container}>
-            <View style={styles.tableContainer}>
-               <View style={styles.tableRowHeader}>
-                    {ProdutosHeaders.map((header) => 
-                        <View style={styles.tableColumnHeader}>
-                            <Text style={styles.textHeader}>{header}</Text>
-                        </View>
-                    )}
-               </View>
+        <>
+            <View>
+                <Pressable style={[Style.buttonSecondary,styles.buttonMpPrimary]} onPress={viewModal}>
+                    <Text style={Style.textButtonSecondary}>Criar</Text>
+                </Pressable>
+            </View>
+
+              
+            <View style={styles.container}>
+                <View style={styles.tableContainer}>
+                <View style={styles.tableRowHeader}>
+                        {ProdutosHeaders.map((header) => 
+                            <View style={styles.tableColumnHeader}>
+                                <Text style={styles.textHeader}>{header}</Text>
+                            </View>
+                        )}
+                </View>
 
                 {Products?.map((product) => {
                     
@@ -57,11 +77,23 @@ const ManutencaoProdutos:React.FC = () => {
                             </View>
                         </View>
                     )})}
-               
+                
+                </View>
             </View>
-        </View>
+                <SafeAreaView style={styles.container}>
+                  <View>
+                    <CriarProdutoModal
+                      visible={modalVisible}
+                      onClose={() => setModalVisible(false)}
+                    />
+                  </View>
+                </SafeAreaView>
+          
+        </>
     );
 }
+
+
 
 export default ManutencaoProdutos;
 
@@ -116,5 +148,15 @@ const styles = StyleSheet.create({
     },
     textLineItem: {
       color: "#000000"
+    },
+    buttonMpPrimary: {
+      width: 90,
+      borderRadius: 20,
+      padding: 10,
+      marginBottom: 0,
+      marginTop: 20,
+      marginLeft: 20,
+      boxShadow: "0 2px 4px darkslategray"
     }
+
 });

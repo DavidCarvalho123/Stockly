@@ -7,3 +7,13 @@ Stockly-Client/node_modules/*
 /Stockly-Server/obj/Debug/net8.0/Stockly-Server.AssemblyInfoInputs.cache
 /Stockly-Server/obj/project.assets.json
 /Stockly-Server/obj/project.assets.json
+/Stockly-Server/.idea/.idea.Stockly-Server/.idea/AndroidProjectSystem.xml
+/Stockly-Server/.idea/.idea.Stockly-Server/.idea/indexLayout.xml
+/Stockly-Server/.idea/.idea.Stockly-Server/.idea/projectSettingsUpdater.xml
+/Stockly-Server/.idea/.idea.Stockly-Server/.idea/vcs.xml
+/Stockly-Server/.idea/.idea.Stockly-Server/.idea/workspace.xml
+/Stockly-Server/obj/project.packagespec.json
+/Stockly-Server/obj/rider.project.model.nuget.info
+/Stockly-Server/obj/rider.project.restore.info
+/Stockly-Server/obj/Stockly-Server.csproj.nuget.g.targets
+/Stockly-Server/Stockly-Server.sln.DotSettings.user
