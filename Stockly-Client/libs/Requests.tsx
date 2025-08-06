@@ -33,12 +33,32 @@ export const TestConnection = async () => {
 
 export const GetAllPoducts = async () => {
     var results: any = '';
-    await fetch(baseUrl + 'Produtos/GetAllProdutos')
-            .then((resp) => resp.json())
-            .then((json) => results = json)
-            .catch((error) => console.error(error));
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Produtos/GetAllProdutos', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
     return results;
 }
 
 // -----------
 
+// Localizações
+
+export const GetTreeLocals = async () => {
+    var results: any = '';
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Localizacoes/GetTreeLocations', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
+    return results;
+}
+
+// -----------
