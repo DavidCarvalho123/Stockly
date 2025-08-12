@@ -7,6 +7,7 @@ export interface TreeLocals{
     armazemCentral?: boolean;
     localReal?: boolean;
     sizeX: number;
+    sizeY?: number;
     sizeZ: number;
     coordX?: number;
     coordY?: number;
@@ -22,4 +23,18 @@ export interface TreeData{ // obligatory object for tree view library
     sizeX:number,
     sizeZ:number,
     nodes?:TreeData[],
+}
+
+export interface FurnitureTypes{
+  name:string,
+  sizeX: number,
+  sizeY: number,
+  sizeZ: number,
+  renderColour?: string
+}
+
+export interface renderedObjectsToSave{
+    obj: FurnitureTypes,
+    localPai: number,
+    position: {x:number,y:number,z:number}
 }

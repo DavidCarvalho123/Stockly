@@ -19,6 +19,7 @@ public partial class Localizaco
     public bool? ArmazemCentral { get; set; }
     public bool? LocalReal { get; set; }
     public float? SizeX { get; set; }
+    public float? SizeY { get; set; }
     public float? SizeZ { get; set; }
 
     public float? CoordX { get; set; }

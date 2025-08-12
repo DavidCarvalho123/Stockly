@@ -53,7 +53,7 @@ const Representacao3d:React.FC = () => {
                     <TreeMenu data={locals} debounceTime={125} disableKeyboard={true} hasSearch={false} onClickItem={({...props})=>{ updateSelectedNode(props) }} />
                 </View>
                 <View style={styles.container3D}>
-                    <MainViewEditable treeData={selectedLocal} />
+                    <MainViewEditable key={selectedLocal?.key} treeData={selectedLocal} />
                 </View>
             </View>
         );

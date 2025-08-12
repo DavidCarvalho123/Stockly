@@ -1,3 +1,4 @@
+import { renderedObjectsToSave } from "@/models/Localizacoes";
 import { LoginForm, Token } from "@/models/Login";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -54,6 +55,46 @@ export const GetTreeLocals = async () => {
     if(auth !== null){
         const tokenObj = JSON.parse(auth) as Token;
         await fetch(baseUrl + 'Localizacoes/GetTreeLocations', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
+    return results;
+}
+
+export const GetStoredGraphics = async (localId:number) => {
+    var results: any = '';
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Localizacoes/GetStoredGraphics?localId='+localId, {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
+    return results;
+}
+
+export const UpdatePosObject = async (position:{x:number,y:number,z:number},localId: number) => {
+    var results: Response = new Response();
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Localizacoes/UpdatePosObject?localId='+localId, {method:'PATCH',headers:{'Authorization':'Bearer ' + tokenObj.token,'Content-Type':'Application/json'},body: JSON.stringify(position)})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
+    return results;
+}
+
+
+export const PostGraphicalChanges = async (data:renderedObjectsToSave[]) => {
+    var results: Response = new Response();
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Localizacoes/PostGraphicalChanges', {method:'POST',headers:{'Authorization':'Bearer ' + tokenObj.token,'Content-Type':'Application/json'},body: JSON.stringify(data)})
                 .then((resp) => resp.json())
                 .then((json) => results = json)
                 .catch((error) => console.error(error));
