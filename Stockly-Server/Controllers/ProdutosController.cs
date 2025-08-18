@@ -7,6 +7,7 @@ namespace Stockly_Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProdutosController : ControllerBase
     {
         public ProdutosController() { }

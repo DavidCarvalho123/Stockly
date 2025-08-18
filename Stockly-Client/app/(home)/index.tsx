@@ -48,6 +48,6 @@ const styles = StyleSheet.create({
         flex: 1
     },
     mainWindow: {
-        flex: 4
+        flex: 5
     }
 });

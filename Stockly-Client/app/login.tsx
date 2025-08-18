@@ -5,7 +5,7 @@ import Style from "@/libs/Style";
 import { Redirect } from "expo-router";
 import React, { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 const login = () => {
     const { control, handleSubmit, formState: { errors } } = useForm({defaultValues: {username:'',password:''}})
@@ -30,12 +30,12 @@ const login = () => {
         return (
         <>
          <View style={styles.container}>
-            <View style={styles.loginForm}>
+            <View style={[styles.loginForm, Platform.OS == 'web' ? {width:400} : {width:300}]}>
                 <Text style={Style.StocklyTitle}>Stockly</Text>
                 <View style={[styles.textInputViews,{marginTop: 50}]}>
                     <Controller control={control} rules={{required: true}} 
                     render={({field}) => (
-                        <TextInput style={styles.textInputs} placeholder="Nome de Utilizador"
+                        <TextInput style={styles.textInputs} placeholder="Nome de Utilizador" placeholderTextColor={'#c2c2c2ff'}
                         value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} />
                     )}
                     name='username' />
@@ -44,7 +44,7 @@ const login = () => {
                 <View style={styles.textInputViews}>
                     <Controller control={control} rules={{required: true}} 
                     render={({field}) => (
-                        <TextInput style={styles.textInputs} placeholder="Password"
+                        <TextInput style={styles.textInputs} placeholder="Password" placeholderTextColor={'#c2c2c2ff'} secureTextEntry={true}
                         value={field.value} onBlur={field.onBlur} onChangeText={field.onChange} />
                     )}
                     name='password' />
@@ -77,7 +77,6 @@ const styles = StyleSheet.create({
     },
     loginForm:{
         backgroundColor: Colours.loginBlue,
-        width: '20%',
         height: '50%',
         borderRadius: 15,
         boxShadow: '4px 5px 3px 5px rgb(191 191 191);',
@@ -90,6 +89,8 @@ const styles = StyleSheet.create({
     },
     textInputs:{
         backgroundColor: '#F4F6FA',
+        borderColor:'grey',
+        borderWidth:1,
         width:250,
         borderRadius: 5,
         height: 35,

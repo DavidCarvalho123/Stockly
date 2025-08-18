@@ -7,5 +7,8 @@ const config = getDefaultConfig(__dirname);
     if(config.resolver.sourceExts.indexOf(ext) === -1){
         config.resolver.sourceExts.push(ext);
     }
-})
+});
+[('browser', 'require', 'react-native')].forEach((info) => {
+    config.resolver.unstable_conditionNames.push(info);
+});
 module.exports = config;
