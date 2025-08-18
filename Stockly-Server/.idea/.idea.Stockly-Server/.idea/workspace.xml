@@ -9,17 +9,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07885719-1068-4dfe-9065-c0b590a6a15e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Models/ProdutoFormModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/app/(home)/_layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/app/(home)/_layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/components/Modals/CriarProdutoModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/components/Modals/CriarProdutoModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Stockly-Client/components/Produtos/ManutencaoProdutos.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/components/Produtos/ManutencaoProdutos.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Stockly-Client/libs/Requests.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/libs/Requests.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Stockly-Client/libs/Style.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/libs/Style.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Stockly-Client/models/Produtos.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/models/Produtos.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Stockly-Client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Stockly-Client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../Stockly-Client/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Stockly-Server/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Stockly-Server/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.dgspec.json" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.dgspec.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.props" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.props" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.targets" beforeDir="false" afterPath="$PROJECT_DIR$/obj/Stockly-Server.csproj.nuget.g.targets" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/obj/project.nuget.cache" beforeDir="false" afterPath="$PROJECT_DIR$/obj/project.nuget.cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/ProdutosController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ProdutosController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/Produto.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Produto.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/StocklyContext.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/StocklyContext.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Models/Utilizadore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Models/Utilizadore.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Properties/launchSettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Stockly-Server.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Stockly-Server.sln.DotSettings.user" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +40,19 @@
     <setting file="file://$PROJECT_DIR$/Models/Acesso.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Models/Estado.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Models/Fornecedore.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/Pedido.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/Produto.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Models/StocklyContext.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Models/StocksPorEstado.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/12e9a7f7339f4e7baa1c46047906cac1219600/7c/6ee81052/FromBodyAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/12e9a7f7339f4e7baa1c46047906cac1219600/f4/a9d24bc4/RouteAttribute.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/12e9a7f7339f4e7baa1c46047906cac1219600/fd/1ea08620/ActionMethodExecutor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6539e1fe63a04059b3bf64f515e7a5fb16448/68/847e63bf/JwtSecurityToken.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/6539e1fe63a04059b3bf64f515e7a5fb16448/a7/30d8aeec/JwtSecurityTokenHandler.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/8a3b3182031541368e20e26e04ba0400b138/4f/f3fbde6e/IdentityUser`1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/c771ab3630154d75b70995034e966d1090000/98/9a8d35cf/SignInManager`1.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/local/share/dotnet/sdk/9.0.202/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.props" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file:///usr/local/share/dotnet/sdk/9.0.202/Sdks/Microsoft.NET.Sdk.Web/Sdk/Sdk.targets" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
@@ -118,7 +134,23 @@
       <workItem from="1753653325238" duration="343000" />
       <workItem from="1753908867749" duration="1810000" />
       <workItem from="1753917399310" duration="56000" />
-      <workItem from="1753978331617" duration="2553000" />
+      <workItem from="1753978331617" duration="3880000" />
+      <workItem from="1753998051132" duration="415000" />
+      <workItem from="1754063150128" duration="1873000" />
+      <workItem from="1754238622248" duration="775000" />
+      <workItem from="1754245845686" duration="590000" />
+      <workItem from="1754336169446" duration="1218000" />
+      <workItem from="1754423897188" duration="3154000" />
+      <workItem from="1754429605910" duration="647000" />
+      <workItem from="1754511004844" duration="1601000" />
+      <workItem from="1754512613475" duration="4871000" />
+      <workItem from="1754820278851" duration="8171000" />
+      <workItem from="1754941177282" duration="710000" />
+      <workItem from="1755117606220" duration="3845000" />
+      <workItem from="1755371932250" duration="3204000" />
+      <workItem from="1755376198285" duration="5942000" />
+      <workItem from="1755442634113" duration="7591000" />
+      <workItem from="1755548719687" duration="868000" />
     </task>
     <servers />
   </component>
@@ -144,6 +176,19 @@
           <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
           <option name="timeStamp" value="3" />
         </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Controllers/TokenController.cs</url>
+          <line>43</line>
+          <properties documentPath="$PROJECT_DIR$/Controllers/TokenController.cs" containingFunctionPresentation="Method 'Login'">
+            <startOffsets>
+              <option value="1816" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1879" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>

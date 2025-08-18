@@ -3,7 +3,7 @@ import { Checkbox } from "react-native-paper";
 import Style from "@/libs/Style";
 import { Controller, useForm } from "react-hook-form";
 import { ProdutoForm } from "@/models/Produtos";
-import { CriarProduto, GetAllSuppliers, GetAllDepartments } from "@/libs/Requests";
+import { GetProdutoById, EditarProduto, GetAllSuppliers, GetAllDepartments } from "@/libs/Requests";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -18,6 +18,12 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Colours } from "@/libs/Constants";
 
+type Props = {
+  produtoId: number;
+  visible: boolean;
+  onClose: () => void;
+};
+
 // sombra cross-platform
 const shadow = {
   ...Platform.select({
@@ -27,30 +33,8 @@ const shadow = {
   }),
 };
 
-type Props = {
-  visible: boolean;
-  onClose: () => void;
-};
-
 const unidades = ["Unidade", "Kg", "Litro", "Caixa"];
 const ivaOptions = ["6", "13", "23"];
-
-// Estado "vazio" do formulário
-const EMPTY_FORM: ProdutoForm = {
-  nome: "",
-  codigoEAN: "",
-  departamento: "",
-  fornecedor: "",
-  unidade: "",
-  iva: "",
-  precoCompra: "",
-  precoVenda: "",
-  stockMinimo: "",
-  altura: "",
-  largura: "",
-  comprimento: "",
-  ativo: true,
-};
 
 const Label: React.FC<{ text: string; required?: boolean }> = ({ text, required }) => (
   <Text style={styles.label}>
@@ -58,43 +42,55 @@ const Label: React.FC<{ text: string; required?: boolean }> = ({ text, required 
   </Text>
 );
 
-const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
+const EditarProdutoModal: React.FC<Props> = ({ produtoId, visible, onClose }) => {
   const { control, handleSubmit, reset, formState: { errors } } =
-    useForm<ProdutoForm>({ defaultValues: EMPTY_FORM });
+    useForm<ProdutoForm>({ defaultValues: { ativo: false } as any });
 
   const [departamentos, setDepartamentos] = useState<{ id: number; nome: string }[]>([]);
   const [fornecedores, setFornecedores] = useState<{ id: number; nome: string }[]>([]);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Ao abrir o modal, limpa o formulário e carrega deps/sups
   useEffect(() => {
     if (!visible) return;
-    reset(EMPTY_FORM);
+
     (async () => {
       try {
-        const deps = await GetAllDepartments();
-        const sups = await GetAllSuppliers();
+        const [deps, sups, produto] = await Promise.all([
+          GetAllDepartments(),
+          GetAllSuppliers(),
+          GetProdutoById(produtoId)
+        ]);
+
         setDepartamentos(deps);
         setFornecedores(sups);
+
+        reset({
+          nome: produto.nome ?? "",
+          codigoEAN: produto.ean ?? "",
+          departamento: String(produto.idDepartamento ?? ""),
+          fornecedor: String(produto.idFornecedor ?? ""),
+          unidade: produto.tipoUnidade ?? "",
+          stockMinimo: produto.quantidadeMinimaPedido?.toString() ?? "",
+          altura: produto.altura?.toString() ?? "",
+          largura: produto.largura?.toString() ?? "",
+          comprimento: produto.comprimento?.toString() ?? "",
+          precoCompra: produto.precoCompra?.toString() ?? "",
+          precoVenda: produto.precoVenda?.toString() ?? "",
+          iva: produto.iva?.toString() ?? "",
+          ativo: !!produto.ativo,
+        });
       } catch (e) {
-        console.error("Erro a carregar deps/sups:", e);
+        console.error("Erro a carregar produto:", e);
       }
     })();
-  }, [visible, reset]);
+  }, [visible, produtoId, reset]);
 
   const onSubmit = async (formData: ProdutoForm) => {
     try {
-      await CriarProduto(formData);
-      reset(EMPTY_FORM); // limpa após gravar
+      await EditarProduto(produtoId, formData);
       onClose();
     } catch (e) {
-      console.error("Erro ao criar produto:", e);
+      console.error("Erro ao editar produto:", e);
     }
-  };
-
-  const onCancel = () => {
-    reset(EMPTY_FORM); // limpa ao cancelar
-    onClose();
   };
 
   if (!visible) return null;
@@ -103,7 +99,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
     <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.overlay}>
         <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.modal}>
-          <Text style={styles.title}>Criar Produto</Text>
+          <Text style={styles.title}>Editar Produto</Text>
 
           <ScrollView contentContainerStyle={styles.form}>
             {/* Nome */}
@@ -115,15 +111,9 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                 rules={{ required: "Campo obrigatório" }}
                 render={({ field: { onChange, onBlur, value } }) => (
                   <TextInput
-                    style={[
-                      styles.input,
-                      errors.nome && styles.inputError,
-                      focusedField === "nome" && styles.inputFocused,
-                    ]}
+                    style={[styles.input, errors.nome && styles.inputError]}
                     placeholder="Nome do produto"
-                    placeholderTextColor="#A0A0A0"
-                    onBlur={() => { onBlur(); setFocusedField(null); }}
-                    onFocus={() => setFocusedField("nome")}
+                    onBlur={onBlur}
                     onChangeText={onChange}
                     value={value}
                   />
@@ -139,17 +129,10 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                 control={control}
                 name="codigoEAN"
                 rules={{ required: "Campo obrigatório" }}
-                render={({ field: { onChange, value, onBlur } }) => (
+                render={({ field: { onChange, value } }) => (
                   <TextInput
-                    style={[
-                      styles.input,
-                      errors.codigoEAN && styles.inputError,
-                      focusedField === "codigoEAN" && styles.inputFocused,
-                    ]}
+                    style={[styles.input, errors.codigoEAN && styles.inputError]}
                     placeholder="EAN único"
-                    placeholderTextColor="#A0A0A0"
-                    onBlur={() => { onBlur(); setFocusedField(null); }}
-                    onFocus={() => setFocusedField("codigoEAN")}
                     onChangeText={onChange}
                     value={value}
                   />
@@ -161,11 +144,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
             {/* Departamento */}
             <View style={styles.inputWrapper}>
               <Label text="Departamento" required />
-              <View style={[
-                styles.pickerBox,
-                (errors.departamento && styles.pickerError) || null,
-                focusedField === "departamento" && styles.inputFocused
-              ]}>
+              <View style={[styles.pickerBox, errors.departamento && styles.pickerError]}>
                 <Controller
                   control={control}
                   name="departamento"
@@ -176,8 +155,6 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                       onValueChange={onChange}
                       style={styles.pickerInner}
                       dropdownIconColor="#5F5F5F"
-                      onFocus={() => setFocusedField("departamento")}
-                      onBlur={() => setFocusedField(null)}
                     >
                       <Picker.Item label="-- Selecione --" value="" />
                       {departamentos.map((dep) => (
@@ -193,11 +170,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
             {/* Fornecedor */}
             <View style={styles.inputWrapper}>
               <Label text="Fornecedor" required />
-              <View style={[
-                styles.pickerBox,
-                (errors.fornecedor && styles.pickerError) || null,
-                focusedField === "fornecedor" && styles.inputFocused
-              ]}>
+              <View style={[styles.pickerBox, errors.fornecedor && styles.pickerError]}>
                 <Controller
                   control={control}
                   name="fornecedor"
@@ -208,8 +181,6 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                       onValueChange={onChange}
                       style={styles.pickerInner}
                       dropdownIconColor="#5F5F5F"
-                      onFocus={() => setFocusedField("fornecedor")}
-                      onBlur={() => setFocusedField(null)}
                     >
                       <Picker.Item label="-- Selecione --" value="" />
                       {fornecedores.map((f) => (
@@ -225,11 +196,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
             {/* Unidade */}
             <View style={styles.inputWrapper}>
               <Label text="Unidade" required />
-              <View style={[
-                styles.pickerBox,
-                (errors.unidade && styles.pickerError) || null,
-                focusedField === "unidade" && styles.inputFocused
-              ]}>
+              <View style={[styles.pickerBox, errors.unidade && styles.pickerError]}>
                 <Controller
                   control={control}
                   name="unidade"
@@ -240,8 +207,6 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                       onValueChange={onChange}
                       style={styles.pickerInner}
                       dropdownIconColor="#5F5F5F"
-                      onFocus={() => setFocusedField("unidade")}
-                      onBlur={() => setFocusedField(null)}
                     >
                       <Picker.Item label="-- Selecione --" value="" />
                       {unidades.map((u) => (
@@ -257,11 +222,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
             {/* IVA */}
             <View style={styles.inputWrapper}>
               <Label text="IVA" required />
-              <View style={[
-                styles.pickerBox,
-                (errors.iva && styles.pickerError) || null,
-                focusedField === "iva" && styles.inputFocused
-              ]}>
+              <View style={[styles.pickerBox, errors.iva && styles.pickerError]}>
                 <Controller
                   control={control}
                   name="iva"
@@ -272,8 +233,6 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                       onValueChange={onChange}
                       style={styles.pickerInner}
                       dropdownIconColor="#5F5F5F"
-                      onFocus={() => setFocusedField("iva")}
-                      onBlur={() => setFocusedField(null)}
                     >
                       <Picker.Item label="-- Selecione --" value="" />
                       {ivaOptions.map((i) => (
@@ -304,20 +263,16 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                     required: f.required ? "Campo obrigatório" : false,
                     validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),
                   }}
-                  render={({ field: { onChange, value, onBlur } }) => (
+                  render={({ field: { onChange, value } }) => (
                     <TextInput
                       style={[
                         styles.input,
                         (errors as any)[f.name] && styles.inputError,
-                        focusedField === f.name && styles.inputFocused,
                       ]}
                       placeholder="0"
-                      placeholderTextColor="#A0A0A0"
                       keyboardType="numeric"
                       onChangeText={onChange}
                       value={value as string}
-                      onBlur={() => { onBlur(); setFocusedField(null); }}
-                      onFocus={() => setFocusedField(f.name)}
                     />
                   )}
                 />
@@ -334,11 +289,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
                 name="ativo"
                 render={({ field: { value, onChange } }) => (
                   <View style={styles.checkboxContainer}>
-                    <Checkbox
-                      status={value ? "checked" : "unchecked"}
-                      onPress={() => onChange(!value)}
-                      color={Colours.stocklyBlue}
-                    />
+                    <Checkbox status={value ? "checked" : "unchecked"} onPress={() => onChange(!value)} color={Colours.stocklyBlue} />
                     <Text style={styles.checkboxLabel}>Produto Ativo</Text>
                   </View>
                 )}
@@ -347,16 +298,10 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
           </ScrollView>
 
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[Style.buttonSecondary, styles.buttonPrimary, shadow]}
-              onPress={handleSubmit(onSubmit)}
-            >
-              <Text style={styles.textPrimary}>Criar</Text>
+            <TouchableOpacity style={[Style.buttonSecondary, styles.buttonPrimary, shadow]} onPress={handleSubmit(onSubmit)}>
+              <Text style={styles.textPrimary}>Guardar</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={[Style.buttonPrimary, styles.buttonSecondary, shadow]}
-              onPress={onCancel}
-            >
+            <TouchableOpacity style={[Style.buttonPrimary, styles.buttonSecondary, shadow]} onPress={onClose}>
               <Text style={styles.textSecondary}>Cancelar</Text>
             </TouchableOpacity>
           </View>
@@ -366,7 +311,7 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
   );
 };
 
-export default CriarProdutoModal;
+export default EditarProdutoModal;
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center", padding: 10 },
@@ -376,39 +321,11 @@ const styles = StyleSheet.create({
   inputWrapper: { width: "48%", marginBottom: 15 },
   label: { fontSize: 14, color: "#1A1A1A", marginBottom: 4 },
   required: { color: "#EB5757" },
+  input: { backgroundColor: "#F5F7FA", padding: 10, borderRadius: 6, borderWidth: 1, borderColor: "#E0E0E0", height: 44 },
   inputError: { borderColor: "#EB5757" },
-  input: {
-    backgroundColor: "#F5F7FA",
-    padding: 10,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    height: 44,
-    outlineStyle: "none" as any,
-    outlineWidth: 0,
-    outlineColor: "transparent",
-  },
-  inputFocused: {
-    borderColor: Colours.stocklyBlue,
-    borderWidth: 2,
-    outlineStyle: "none" as any,
-    outlineWidth: 0,
-    outlineColor: "transparent",
-    ...(Platform.OS === "web" ? { boxShadow: `0 0 0 2px ${Colours.stocklyBlue}20` } : null),
-  },
-  pickerBox: {
-    backgroundColor: "#F5F7FA",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    borderRadius: 6,
-    height: 44,
-    justifyContent: "center",
-    outlineStyle: "none" as any,
-    outlineWidth: 0,
-    outlineColor: "transparent",
-  },
-  pickerError: { borderColor: "#EB5757", borderWidth: 1.5 },
   errorText: { fontSize: 12, color: "#EB5757", marginTop: 4 },
+  pickerBox: { backgroundColor: "#F5F7FA", borderWidth: 1, borderColor: "#E0E0E0", borderRadius: 6, height: 44, justifyContent: "center" },
+  pickerError: { borderColor: "#EB5757", borderWidth: 1.5 },
   pickerInner: { height: 44 },
   checkboxWrapper: { width: "100%", marginTop: 10, marginBottom: 15 },
   checkboxContainer: { flexDirection: "row", alignItems: "center" },
