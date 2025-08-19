@@ -5,17 +5,18 @@ import Style from "@/libs/Style";
 import { Redirect } from "expo-router";
 import React, { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 const login = () => {
     const { control, handleSubmit, formState: { errors } } = useForm({defaultValues: {username:'',password:''}})
     const [FailedLogin, setFailedLogin] = useState(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const auth = useContext(AuthContext);
 
     
     const submitForm = async (data:{username: string;password: string;}) => {
         setFailedLogin(false);
-        // loading spinner?
+        setIsProcessing(true);
         let result = await Login(data);
         if(result.status >= 200 && result.status < 300){
             const json = await result.json();
@@ -24,6 +25,7 @@ const login = () => {
         else{
             setFailedLogin(true);
         }
+        setIsProcessing(false);
     }
 
         if(auth.isLoggedIn){return <Redirect href={"/"}/>;}
@@ -54,7 +56,8 @@ const login = () => {
                 <View style={styles.failedLogin}>
                     {FailedLogin ? <Text style={{color: '#ffffff'}}>Utilizador ou Password inválidos.</Text> : <></>}
                 </View>
-                    <Pressable style={[Style.buttonPrimary, styles.submitButton]} onPress={handleSubmit(submitForm)}>
+                <ActivityIndicator size="large" color={'white'} animating={isProcessing}/>
+                    <Pressable style={[Style.buttonPrimary, styles.submitButton,{ opacity:isProcessing ? 0.5 : 1 }]} onPress={handleSubmit(submitForm)} disabled={isProcessing}>
                         <Text style={Style.textButtonPrimary} >Entrar</Text>
                     </Pressable>
                 </View>
