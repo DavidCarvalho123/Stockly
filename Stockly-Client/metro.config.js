@@ -8,9 +8,6 @@ const config = getDefaultConfig(__dirname);
         config.resolver.sourceExts.push(ext);
     }
 });
-
-config.resolver.assetExts.push("gltf", "glb", "bin", "obj", "mtl");
-
 [('browser', 'require', 'react-native')].forEach((info) => {
     config.resolver.unstable_conditionNames.push(info);
 });

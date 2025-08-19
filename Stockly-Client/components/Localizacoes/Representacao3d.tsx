@@ -1,13 +1,14 @@
+import MainView from "@/libs/3D/MainView";
 import MainViewEditable from "@/libs/3D/MainViewEditable";
 import { GetTreeLocals } from "@/libs/Requests";
 import { TreeData, TreeLocals } from "@/models/Localizacoes";
 import { useEffect, useState } from "react";
-import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 
-import MainView from "@/libs/3D/MainView";
-import AntDesign from '@expo/vector-icons/AntDesign';
 import TreeMenu, { Item } from 'react-simple-tree-menu';
 import '../../node_modules/react-simple-tree-menu/dist/main.css';
+
+
 
 const ConvertTreeData = (dbData:TreeLocals[]) => {
     var treeData: TreeData[] = [];
@@ -26,57 +27,9 @@ const ConvertTreeData = (dbData:TreeLocals[]) => {
     return treeData;
 }
 
-const TreeNodeItem: React.FC<{
-  node: TreeData;
-  level: number;
-  onNodeSelect: (node: TreeData) => void;
-}> = ({ node, level, onNodeSelect }) => {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <View>
-      <View style={[styles.node, { paddingLeft: level * 40, flexDirection: 'row', alignItems: 'center', paddingBottom: 7, paddingTop:7 }]}>
-        
-        {node.nodes && (
-          <TouchableOpacity onPress={() => setExpanded(prev => !prev)}>
-            <AntDesign
-              name={expanded ? 'minus' : 'plus'}
-              size={24}
-              color="black"
-              style={{ marginRight: 6 }}
-            />
-          </TouchableOpacity>
-        )}
-
-        <TouchableOpacity
-          onPress={() => onNodeSelect(node)}
-          style={{ flex: 1 }}
-        >
-          <Text style={styles.label}>{node.label}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {expanded && node.nodes && (
-        <FlatList
-          data={node.nodes}
-          keyExtractor={(item) => item.key}
-          renderItem={({ item }) => (
-            <TreeNodeItem
-              node={item}
-              level={level + 1}
-              onNodeSelect={onNodeSelect}
-            />
-          )}
-        />
-      )}
-    </View>
-  );
-};
-
 const Representacao3d:React.FC = () => {
     const [locals, setLocals] = useState<TreeData[]>();
     const [selectedLocal, setSelectedLocal] = useState<Item>();
-    const [selectedViewLocal, setSelectedViewLocal] = useState<TreeData | undefined>(undefined);
 
     useEffect(() => {
         async function fetchData() {
@@ -91,12 +44,6 @@ const Representacao3d:React.FC = () => {
 
     const updateSelectedNode = (selectedNode: Item) => {
         setSelectedLocal(selectedNode);
-    }
-    const updateSelectedMobileNode = (selectedNode: TreeData | undefined) => {
-        setSelectedViewLocal(selectedNode);
-    }
-    const clearSelectedMobileNode = () => {
-        setSelectedViewLocal(undefined);
     }
     
     if(Platform.OS === 'web'){
@@ -114,16 +61,7 @@ const Representacao3d:React.FC = () => {
     else{
         return ( 
             <>
-            {selectedViewLocal === undefined &&
-                <FlatList
-                    data={locals}
-                    keyExtractor={(item) => item.key}
-                    renderItem={({ item }) => <TreeNodeItem node={item} level={0} onNodeSelect={updateSelectedMobileNode} />}
-                />
-            }
-            {selectedViewLocal &&
-                <MainView treeData={selectedViewLocal} resetTreeData={clearSelectedMobileNode}/>
-            }
+                <MainView/>
             </>
         );
     }
@@ -141,14 +79,5 @@ const styles = StyleSheet.create({
     },
     container3D:{
         flex:5
-    },
-    node: {
-        paddingVertical: 6,
-        borderBottomWidth: 1,
-        borderBottomColor: "#eee",
-    },
-    label: {
-        fontSize: 18,
-        color: "#222",
-    },
+    }
 })

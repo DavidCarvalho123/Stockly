@@ -37,7 +37,5 @@ public partial class Localizaco
 
     public virtual ICollection<StocksPorEstado> StocksPorEstados { get; set; } = new List<StocksPorEstado>();
 
-    public virtual ICollection<LocalizacoesProduto> LocalizacoesProdutos { get; set; } = new List<LocalizacoesProduto>();
-
     public virtual ICollection<Utilizadore> Utilizadores { get; set; } = new List<Utilizadore>();
 }

@@ -60,8 +60,7 @@ const ConvertDbObjects = (dbData: TreeLocals[]) => {
 interface Props{
   treeData:Item|undefined;
 }
-const MainViewEditable = 
-({treeData}: Props) => {
+const MainViewEditable = ({treeData}: Props) => {
   const floorRef = useRef(null!);
   const [controlsEnabled, setControlsEnabled] = useState<boolean>(true);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);

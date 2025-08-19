@@ -3,7 +3,7 @@
     "name": "Stockly-Client",
     "slug": "Stockly-Client",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "stocklyclient",
     "userInterfaceStyle": "automatic",

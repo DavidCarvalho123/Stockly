@@ -1,13 +1,14 @@
-import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
 import { Colours } from "@/libs/Constants";
 import { GetAllPoducts } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { ProdutosManutencao } from "@/models/Produtos";
-import AntDesign from '@expo/vector-icons/AntDesign';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from "react";
-import { FlatList, Platform, Pressable, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView} from 'react-native-safe-area-context';
+import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
+
+
+
 
 const ProdutosHeaders = ['EAN', 'Nome', 'Departamento', 'Unidade', 'Preço Venda', 'IVA', 'Ativo']
 
@@ -25,107 +26,73 @@ const ManutencaoProdutos:React.FC = () => {
         fetchData();
     }, [])
 
-    const viewModal = () => {
-        console.log("habemos button");
-        setModalVisible(true);
-    }
+const viewModal = () => {
+    console.log("habemos button");
+    setModalVisible(true);
+}
 
-    if(Platform.OS === 'web')
-        return ( 
-            <>
-                <View>
-                    <Pressable style={[Style.buttonSecondary,styles.buttonMpPrimary]} onPress={viewModal}>
-                        <Text style={Style.textButtonSecondary}>Criar</Text>
-                    </Pressable>
-                </View>
+    return ( 
+        <>
+            <View>
+                <Pressable style={[Style.buttonSecondary,styles.buttonMpPrimary]} onPress={viewModal}>
+                    <Text style={Style.textButtonSecondary}>Criar</Text>
+                </Pressable>
+            </View>
 
-                
-                <View style={styles.container}>
-                    <View style={styles.tableContainer}>
-                    <View style={styles.tableRowHeader}>
-                            {ProdutosHeaders.map((header) => 
-                                <View style={styles.tableColumnHeader}>
-                                    <Text style={styles.textHeader}>{header}</Text>
-                                </View>
-                            )}
-                    </View>
-
-                    {Products && Products?.map((product) => {
-                        
-                        return(
-                            <View style={styles.tableRow}>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.ean}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.nome}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.departamento}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.tipoUnidade}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.precoVenda}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.iva}</Text>
-                                </View>
-                                <View style={styles.tableBodyCell}>
-                                    <Text style={styles.textLineItem}>{product.ativo ? 'Ativo' : 'Inativo'}</Text>
-                                </View>
+              
+            <View style={styles.container}>
+                <View style={styles.tableContainer}>
+                <View style={styles.tableRowHeader}>
+                        {ProdutosHeaders.map((header) => 
+                            <View style={styles.tableColumnHeader}>
+                                <Text style={styles.textHeader}>{header}</Text>
                             </View>
-                        )})}
-                    
-                    </View>
+                        )}
                 </View>
-                    <SafeAreaView style={styles.container}>
-                    <View>
-                        <CriarProdutoModal
-                        visible={modalVisible}
-                        onClose={() => setModalVisible(false)}
-                        />
-                    </View>
-                    </SafeAreaView>
-            
-            </>
-        );
-    else
-        return(
-            <SafeAreaView>
-                {Products && 
-                    <FlatList data={Products}
-                        renderItem={({item}) => <Item key={item.id} item={item}/>} />
-                }
-            </SafeAreaView>
-        );
-}
 
-interface ItemProps{
-    item: ProdutosManutencao
-}
-const Item = ({item}:ItemProps) => {
-    return(
-        <View style={[styles.itemContainer]}>
-                <View style={[styles.itemLeft]}>
-                    <Text><Text style={styles.headerItem}>EAN:</Text> {item.ean}</Text>
-                    <Text><Text style={styles.headerItem}>Nome:</Text> {item.nome}</Text>
-                    <Text ><Text style={styles.headerItem}>Departamento:</Text> {item.departamento}</Text>
-                    <Text><Text style={styles.headerItem}>Fornecedor:</Text> {item.departamento}</Text>
+                {Products?.map((product) => {
+                    
+                    return(
+                        <View style={styles.tableRow}>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.ean}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.nome}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.departamento}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.tipoUnidade}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.precoVenda}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.iva}</Text>
+                            </View>
+                            <View style={styles.tableBodyCell}>
+                                <Text style={styles.textLineItem}>{product.ativo ? 'Ativo' : 'Inativo'}</Text>
+                            </View>
+                        </View>
+                    )})}
+                
                 </View>
-                <View style={styles.itemRight}>
-                    <Text><Text style={styles.headerItem}>Unidade:</Text> {item.tipoUnidade}</Text>
-                    <Text><Text style={styles.headerItem}>Preço Venda:</Text> {item.precoVenda} €</Text>
-                    <View style={styles.checkboxItem}>
-                        <Text style={[styles.headerItem, {marginTop: 1}]}>Ativo:</Text>
-                        {item.ativo ? <AntDesign name="check" size={20} color="green" /> : <AntDesign name="close" size={20} color="#ec1f1fff" />}
-                    </View>
-                    <MaterialIcons style={{marginTop:'auto'}} name="inventory" size={24} color="black" />
-                </View>
-        </View>
+            </View>
+                <SafeAreaView style={styles.container}>
+                  <View>
+                    <CriarProdutoModal
+                      visible={modalVisible}
+                      onClose={() => setModalVisible(false)}
+                    />
+                  </View>
+                </SafeAreaView>
+          
+        </>
     );
 }
+
 
 
 export default ManutencaoProdutos;
@@ -177,10 +144,10 @@ const styles = StyleSheet.create({
       fontWeight: "bold"
     },
     textHeaderSubTitle: {
-        fontSize: 12
+       fontSize: 12
     },
     textLineItem: {
-        color: "#000000"
+      color: "#000000"
     },
     buttonMpPrimary: {
       width: 90,
@@ -190,42 +157,6 @@ const styles = StyleSheet.create({
       marginTop: 20,
       marginLeft: 20,
       boxShadow: "0 2px 4px darkslategray"
-    },
-    itemContainer: {
-        backgroundColor: Colours.sidebarGrey,
-        borderWidth: 1,
-        borderRadius: 5,
-        marginLeft: 30,
-        marginRight: 30,
-        marginBottom: 30,
-        padding: 20,
-        display:'flex',
-        flexDirection:'row'
-    },
-    headerItem:{
-        fontWeight: 'bold'
-    },
-    itemLeft:{
-        width: '50%',
-        gap: 1,
-        zIndex: 999
-    },
-    itemRight:{
-        width: '50%',
-        display:'flex',
-        alignItems: 'flex-end',
-        gap: 1
-    },
-    ativoItem:{
-        height: 100
-    },
-    checkboxItem:{
-        display:'flex',
-        flexDirection: 'row'
-    },
-    inventoryIcon:{
-        display:'flex',
-        alignSelf:'flex-end'
     }
 
 });
