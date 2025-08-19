@@ -1,18 +1,14 @@
+
 import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
+import EditarProdutoModal from "@/components/Modals/EditarProdutoModal";
 import { Colours } from "@/libs/Constants";
 import { GetAllPoducts } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { ProdutosManutencao } from "@/models/Produtos";
-import React, { useEffect, useMemo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
-import EditarProdutoModal from "@/components/Modals/EditarProdutoModal";
-import { Colours } from "@/libs/Constants";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useEffect, useState } from "react";
-import { FlatList, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // ---- Definição única das colunas ----
@@ -224,8 +220,8 @@ if (Platform.OS === 'web')
 else
     return (
         <SafeAreaView>
-            {Products &&
-                <FlatList data={Products}
+            {products &&
+                <FlatList data={products}
                     renderItem={({ item }) => <Item key={item.id} item={item} />} />
             }
         </SafeAreaView>
@@ -361,7 +357,7 @@ const styles = StyleSheet.create({
     inventoryIcon:{
         display:'flex',
         alignSelf:'flex-end'
-    }
+    },
   pagePad: { flex: 1, paddingHorizontal: 10, paddingTop: 10 },
 
   tableBox: {
@@ -437,14 +433,6 @@ const styles = StyleSheet.create({
 
   rowEven: { backgroundColor: "#fff" },
   rowOdd: { backgroundColor: "#fbfbfb" },
-
-  buttonMpPrimary: {
-    width: 90,
-    borderRadius: 20,
-    padding: 10,
-    marginTop: 20,
-    marginLeft: 20,
-  },
 
   btnSmallReset: {
     marginTop: 0,
