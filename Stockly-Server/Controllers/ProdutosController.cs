@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Stockly_Server.Models;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Stockly_Server.Controllers
 {
@@ -48,6 +49,17 @@ namespace Stockly_Server.Controllers
             using var context = new StocklyContext();
             var produto = context.Produtos.FirstOrDefault(p => p.Id == id);
             if (produto == null) return NotFound();
+            
+            const int estadoFrenteLoja = 3;
+            const int localPadrao = 1;
+            
+            var spe = context.StocksPorEstados
+                .FirstOrDefault(s =>
+                    s.IdProduto == id &&
+                    s.Estado == estadoFrenteLoja &&
+                    s.IdLocalizacao == localPadrao);
+
+            var stockMin = spe?.StockMinimo ?? 0;
 
             return Ok(new {
                 id = produto.Id,
@@ -56,14 +68,14 @@ namespace Stockly_Server.Controllers
                 idDepartamento = produto.IdDepartamento,
                 idFornecedor = produto.IdFornecedor,
                 tipoUnidade = produto.TipoUnidade,
-                quantidadeMinimaPedido = produto.QuantidadeMinimaPedido,
                 altura = produto.Altura,
                 largura = produto.Largura,
                 comprimento = produto.Comprimento,
                 precoCompra = produto.PrecoCompra,
                 precoVenda = produto.PrecoVenda,
                 iva = produto.Iva,
-                ativo = produto.Ativo
+                ativo = produto.Ativo,
+                stockMinimo = stockMin
             });
         }
 
@@ -99,7 +111,6 @@ namespace Stockly_Server.Controllers
                         IdDepartamento = int.Parse(model.Departamento),
                         IdFornecedor = int.Parse(model.Fornecedor),
                         TipoUnidade = model.Unidade,
-                        QuantidadeMinimaPedido = string.IsNullOrWhiteSpace(model.StockMinimo) ? null : int.Parse(model.StockMinimo),
                         Altura = string.IsNullOrWhiteSpace(model.Altura) ? null : float.Parse(model.Altura),
                         Largura = string.IsNullOrWhiteSpace(model.Largura) ? null : float.Parse(model.Largura),
                         Comprimento = string.IsNullOrWhiteSpace(model.Comprimento) ? null : float.Parse(model.Comprimento),
@@ -141,7 +152,6 @@ namespace Stockly_Server.Controllers
                 produto.IdDepartamento = int.Parse(model.Departamento);
                 produto.IdFornecedor = int.Parse(model.Fornecedor);
                 produto.TipoUnidade = model.Unidade;
-                produto.QuantidadeMinimaPedido = string.IsNullOrWhiteSpace(model.StockMinimo) ? null : int.Parse(model.StockMinimo);
                 produto.Altura = string.IsNullOrWhiteSpace(model.Altura) ? null : float.Parse(model.Altura);
                 produto.Largura = string.IsNullOrWhiteSpace(model.Largura) ? null : float.Parse(model.Largura);
                 produto.Comprimento = string.IsNullOrWhiteSpace(model.Comprimento) ? null : float.Parse(model.Comprimento);
@@ -186,6 +196,67 @@ namespace Stockly_Server.Controllers
                 .ToList();
             return Ok(list);
         }
+        
+        [HttpPut("SetStockMinimo")]
+        public IActionResult SetStockMinimo(int produtoId, int localId, int estado, int stockMinimo)
+        {
+            try
+            {
+                using (var context = new StocklyContext())
+                {
+                    var entry = context.StocksPorEstados
+                        .FirstOrDefault(s => s.IdProduto == produtoId && s.IdLocalizacao == localId && s.Estado == estado);
+
+                    if (entry == null)
+                    {
+                        entry = new StocksPorEstado
+                        {
+                            IdProduto = produtoId,
+                            IdLocalizacao = localId,
+                            Estado = estado,
+                            Quantidade = 0,
+                            StockMinimo = stockMinimo
+                        };
+                        context.StocksPorEstados.Add(entry);
+                    }
+                    else
+                    {
+                        entry.StockMinimo = stockMinimo;
+                    }
+
+                    context.SaveChanges();
+                    return Ok(entry);
+                }
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [HttpGet("GetStocksByProduto/{produtoId}")]
+        public IActionResult GetStocksByProduto(int produtoId)
+        {
+            List<StocksPorEstado> results = new List<StocksPorEstado>();
+            try
+            {
+                using (var context = new StocklyContext())
+                {
+                    results = context.StocksPorEstados
+
+                        .Where(s => s.IdProduto == produtoId)
+                        .ToList();
+
+                }
+                    return Ok(results);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+        
+        
     }
 
     // ============================
@@ -205,7 +276,7 @@ namespace Stockly_Server.Controllers
         public float? Comprimento { get; set; }
         public float? Altura { get; set; }
         public float? Largura { get; set; }
-        public int? Quantidade { get; set; }
+        
 
         public ProdutosShow(Produto prod, string departmentName)
         {

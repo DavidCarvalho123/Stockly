@@ -31,7 +31,7 @@ public partial class Produto
 
     public int? IdFornecedor { get; set; }
 
-    public int? QuantidadeMinimaPedido { get; set; }
+   
 
     public virtual Departamento? IdDepartamentoNavigation { get; set; }
 

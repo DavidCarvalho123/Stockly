@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"; //funciona
 import { Checkbox } from "react-native-paper";
 import Style from "@/libs/Style";
 import { Controller, useForm } from "react-hook-form";
 import { ProdutoForm } from "@/models/Produtos";
-import { GetProdutoById, EditarProduto, GetAllSuppliers, GetAllDepartments } from "@/libs/Requests";
+import { GetProdutoById, EditarProduto, GetAllSuppliers, GetAllDepartments, SetStockMinimo } from "@/libs/Requests";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -69,7 +69,7 @@ const EditarProdutoModal: React.FC<Props> = ({ produtoId, visible, onClose }) =>
           departamento: String(produto.idDepartamento ?? ""),
           fornecedor: String(produto.idFornecedor ?? ""),
           unidade: produto.tipoUnidade ?? "",
-          stockMinimo: produto.quantidadeMinimaPedido?.toString() ?? "",
+          stockMinimo: produto.stockMinimo ?? "",
           altura: produto.altura?.toString() ?? "",
           largura: produto.largura?.toString() ?? "",
           comprimento: produto.comprimento?.toString() ?? "",
@@ -84,14 +84,19 @@ const EditarProdutoModal: React.FC<Props> = ({ produtoId, visible, onClose }) =>
     })();
   }, [visible, produtoId, reset]);
 
-  const onSubmit = async (formData: ProdutoForm) => {
-    try {
-      await EditarProduto(produtoId, formData);
-      onClose();
-    } catch (e) {
-      console.error("Erro ao editar produto:", e);
-    }
-  };
+const onSubmit = async (formData: ProdutoForm) => {
+  try {
+    await EditarProduto(produtoId, formData);
+
+    // estado 3, localização 1 (conforme regras)
+    const minimo = Number(formData.stockMinimo || 0);
+    await SetStockMinimo(produtoId, 1, 3, minimo);
+
+    onClose();
+  } catch (e) {
+    console.error("Erro ao editar produto:", e);
+  }
+};
 
   if (!visible) return null;
 

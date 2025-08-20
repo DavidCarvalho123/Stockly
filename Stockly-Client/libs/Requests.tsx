@@ -1,4 +1,4 @@
-import { renderedObjectsToSave } from "@/models/Localizacoes";
+import { renderedObjectsToSave } from "@/models/Localizacoes"; //funciona
 import { LoginForm, Token } from "@/models/Login";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -27,7 +27,7 @@ export const TestConnection = async () => {
 
 // ----------- Produtos -----------
 
-export const GetAllPoducts = async () => {
+export const GetAllProducts = async () => {
   var results: any = '';
     const auth = await AsyncStorage.getItem('jwtToken');
     if(auth !== null){
@@ -43,20 +43,28 @@ export const GetAllPoducts = async () => {
 // Fornecedores
 export const GetAllSuppliers = async () => {
   var results: any = '';
-  await fetch(baseUrl + 'Produtos/GetAllFornecedores')
+   const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+  await fetch(baseUrl + 'Produtos/GetAllFornecedores', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
     .then((resp) => resp.json())
     .then((json) => results = json)
     .catch((error) => console.error(error));
+    }
   return results;
 }
 
 // Departamentos
 export const GetAllDepartments = async () => {
   var results: any = '';
-  await fetch(baseUrl + 'Produtos/GetAllDepartamentos')
+   const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+  await fetch(baseUrl + 'Produtos/GetAllDepartamentos', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
     .then((resp) => resp.json())
     .then((json) => results = json)
     .catch((error) => console.error(error));
+    }
   return results;
 }
 
@@ -91,12 +99,16 @@ export const CriarProduto = async (produto: any) => {
 // GET produto por ID
 export const GetProdutoById = async (id: number) => {
   try {
-    const resp = await fetch(baseUrl + 'Produtos/GetProdutoById/' + id);
+     const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+    const resp = await fetch(baseUrl + 'Produtos/GetProdutoById/' + id, {headers:{'Authorization':'Bearer ' + tokenObj.token}});
     if (!resp.ok) {
       const errText = await resp.text();
       throw new Error(`Erro ao obter produto ${id}: ${errText}`);
     }
     return await resp.json();
+  } else throw new Error('Erro no token');
   } catch (error) {
     console.error("Erro no GetProdutoById:", error);
     throw error;
@@ -176,4 +188,91 @@ export const PostGraphicalChanges = async (data:renderedObjectsToSave[]) => {
     return results;
 }
 
-// -----------
+// ----------- StocksPorEstado -----------
+
+// Atualiza/define o stock mínimo num par (produto, local, estado)
+export const SetStockMinimo = async (
+  produtoId: number,
+  localId: number,
+  estado: number,
+  stockMinimo: number
+) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) throw new Error("Token não encontrado. Faça login novamente.");
+  const tokenObj = JSON.parse(auth) as { token: string };
+
+  const resp = await fetch(
+    baseUrl +
+      `Produtos/SetStockMinimo?produtoId=${produtoId}&localId=${localId}&estado=${estado}&stockMinimo=${stockMinimo}`,
+    {
+      method: "PUT",
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    }
+  );
+
+  if (!resp.ok) throw new Error(await resp.text());
+  // alguns controllers devolvem vazio; para segurança:
+  try { return await resp.json(); } catch { return true as any; }
+};
+
+// Ver stocks de um produto
+export const GetStocksByProduto = async (produtoId: number) => {
+  var results: any = [];
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (auth !== null) {
+    const tokenObj = JSON.parse(auth) as Token;
+    await fetch(baseUrl + `Produtos/GetStocksByProduto/${produtoId}`, {
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    })
+      .then((resp) => resp.json())
+      .then((json) => (results = json))
+      .catch((error) => console.error(error));
+  }
+  return results;
+};
+
+
+
+// -------- Localizações: devolve array [{Id, Nome}] (ou {id, nome}) --------
+export const GetAllLocals = async () => {
+  let results: any[] = [];
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) return results;
+  const tokenObj = JSON.parse(auth) as Token;
+
+  try {
+    const resp = await fetch(baseUrl + "Localizacoes/GetAllLocalizacoes", {
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    });
+    if (!resp.ok) {
+      console.error("GetAllLocals failed:", resp.status, await resp.text());
+      return results;
+    }
+    results = await resp.json();
+  } catch (e) {
+    console.error("GetAllLocals error:", e);
+  }
+  return results; // [{Id, Nome}] ou [{id, nome}]
+};
+
+// -------- Estados: devolve array [{Id, Estado1}] (ou {id, nome}) --------
+// Estados
+export const GetAllStates = async (): Promise<Record<number, string>> => {
+  let results: Record<number, string> = {};
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (auth !== null) {
+    const tokenObj = JSON.parse(auth) as Token;
+    await fetch(baseUrl + "Estados/GetAllEstados", {
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    })
+      .then((resp) => resp.json())
+      .then((json) => {
+        results = {};
+        json.forEach((e: any) => {
+          results[e.id] = e.estado1;   // <- usa o campo Estado1 da BD
+        });
+      })
+      .catch((error) => console.error(error));
+  }
+  return results;
+};

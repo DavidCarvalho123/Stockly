@@ -7,7 +7,7 @@ import { Colours } from "@/libs/Constants";
 export default function HomeLayout() {
   const authState = useContext(AuthContext);
 
-  // Adiciona o estilo de focus apenas no cliente (web)
+  //Adiciona o estilo de focus apenas no cliente (web)
   useEffect(() => {
     if (Platform.OS === "web" && typeof document !== "undefined") {
       const style = document.createElement("style");

@@ -1,4 +1,4 @@
-import { GetAllPoducts } from "@/libs/Requests";
+import { GetAllProducts } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { ProdutosManutencao } from "@/models/Produtos";
 import React, { useEffect, useMemo, useState } from "react";
@@ -7,18 +7,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
 import EditarProdutoModal from "@/components/Modals/EditarProdutoModal";
 import { Colours } from "@/libs/Constants";
+import VerStockModal from "@/components/Modals/VerStockModal";
 
 // ---- Definição única das colunas ----
-// Aumentei EAN; reduzi Preço Venda e IVA
 const COLS: { key: keyof ProdutosManutencao | "acao"; label: string; flex: number; filterable?: boolean }[] = [
-  { key: "ean",          label: "EAN",          flex: 1.6, filterable: true }, // ↑
+  { key: "ean",          label: "EAN",          flex: 1.6, filterable: true },
   { key: "nome",         label: "Nome",         flex: 2.0, filterable: true },
   { key: "departamento", label: "Departamento", flex: 2.0, filterable: true },
   { key: "tipoUnidade",  label: "Unidade",      flex: 1.3, filterable: true },
-  { key: "precoVenda",   label: "Preço Venda",  flex: 1.1, filterable: true }, // ↓
-  { key: "iva",          label: "IVA",          flex: 0.8, filterable: true }, // ↓
+  { key: "precoVenda",   label: "Preço Venda",  flex: 1.1, filterable: true },
+  { key: "iva",          label: "IVA",          flex: 0.8, filterable: true },
   { key: "ativo",        label: "Ativo",        flex: 1.0, filterable: true },
-  { key: "acao",         label: "",             flex: 1.2, filterable: false },
+  { key: "acao",         label: "",             flex: 1.9, filterable: false }, // ↑ mais largo para 2 botões
 ];
 
 const TOTAL_FLEX = COLS.reduce((s, c) => s + c.flex, 0);
@@ -26,15 +26,12 @@ const COL_WIDTHS = COLS.map((c) => `${(c.flex / TOTAL_FLEX) * 100}%`);
 const ACCENT = Colours.stocklyBlue;
 
 /* ---------- Utilitários ---------- */
-
-// Texto simples e selecionável (corta com … se não couber)
 const CellText: React.FC<{ text: string }> = ({ text }) => (
   <Text selectable numberOfLines={1} ellipsizeMode="tail" style={styles.cellText}>
     {text}
   </Text>
 );
 
-// Input de filtro com focus ring na cor do botão Criar
 const FilterBox: React.FC<{
   value: string;
   onChange: (t: string) => void;
@@ -63,8 +60,12 @@ const ManutencaoProdutos: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
+  // novo: ver stock
+  const [viewStockId, setViewStockId] = useState<number | null>(null);
+  const [viewStockVisible, setViewStockVisible] = useState(false);
+
   const load = async () => {
-    const data = await GetAllPoducts();
+    const data = await GetAllProducts();
     if (data) {
       setProducts(data as ProdutosManutencao[]);
       setFiltered(data as ProdutosManutencao[]);
@@ -125,7 +126,7 @@ const ManutencaoProdutos: React.FC = () => {
 
   return (
     <>
-      {/* Botão Criar (mesmo sítio/aspeto + shadow igual aos Editar) */}
+      {/* Botão Criar */}
       <View>
         <Pressable
           style={[Style.buttonSecondary, styles.buttonMpPrimary, styles.shadow]}
@@ -150,26 +151,48 @@ const ManutencaoProdutos: React.FC = () => {
               ]}
             >
               {COLS.map((c, i) => {
-                if (c.key === "acao") {
-                  return (
-                    <View
-                      key={`${p.id}-acao`}
-                      style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
-                    >
-                      <Pressable
-                        style={[
-                          Style.buttonSecondary,
-                          styles.btnSmallReset,
-                          styles.btnSmall,
-                          styles.shadow,
-                        ]}
-                        onPress={() => setEditId(p.id)}
-                      >
-                        <Text style={Style.textButtonSecondary}>Editar</Text>
-                      </Pressable>
-                    </View>
-                  );
-                }
+           if (c.key === "acao") {
+  return (
+    <View
+      key={`${p.id}-acao`}
+      style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
+    >
+      <View style={styles.actionRow}>
+        {/* Ver Stock primeiro */}
+        <Pressable
+          style={[
+            Style.buttonSecondary,
+            styles.btnSmallReset,
+            styles.btnSmall,
+            styles.shadow,
+          ]}
+          onPress={() => {
+            setViewStockId(p.id);
+            setViewStockVisible(true);
+          }}
+        >
+          <Text style={Style.textButtonSecondary}>Ver Stock</Text>
+        </Pressable>
+
+        {/* Editar depois, com espaçamento à esquerda */}
+        <Pressable
+          style={[
+            Style.buttonSecondary,
+            Style.editButton,
+            styles.btnSmallReset,
+            styles.btnSmall,
+            styles.shadow,
+            { marginLeft: 8 },
+          ]}
+          onPress={() => setEditId(p.id)}
+        >
+          <Text style={Style.textButtonSecondary}>Editar</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 
                 const val =
                   c.key === "ativo"
@@ -206,6 +229,16 @@ const ManutencaoProdutos: React.FC = () => {
             onClose={() => {
               setEditId(null);
               load();
+            }}
+          />
+        )}
+        {viewStockId !== null && (
+          <VerStockModal
+            produtoId={viewStockId}
+            visible={viewStockVisible}
+            onClose={() => {
+              setViewStockVisible(false);
+              setViewStockId(null);
             }}
           />
         )}
@@ -297,6 +330,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  actionRow: { flexDirection: "row", alignItems: "center" },
 
   rowEven: { backgroundColor: "#fff" },
   rowOdd: { backgroundColor: "#fbfbfb" },

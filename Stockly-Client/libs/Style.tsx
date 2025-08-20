@@ -22,6 +22,11 @@ export default StyleSheet.create({
         paddingBottom: 10,
         borderRadius: 30
     },
+
+    editButton:{
+        backgroundColor: 'rgba(255, 193, 7, 1.00)'
+    },
+
     textButtonPrimary:{
         textAlign: 'center',
         fontSize: 14,
@@ -32,7 +37,6 @@ export default StyleSheet.create({
         fontSize: 14,
         fontWeight:'400',
         color: '#ffffff',
-
     },
     mobileButtonPrimary: {
         backgroundColor: '#ffffff',

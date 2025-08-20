@@ -3,7 +3,7 @@ import { Checkbox } from "react-native-paper";
 import Style from "@/libs/Style";
 import { Controller, useForm } from "react-hook-form";
 import { ProdutoForm } from "@/models/Produtos";
-import { CriarProduto, GetAllSuppliers, GetAllDepartments } from "@/libs/Requests";
+import { CriarProduto, GetAllSuppliers, GetAllDepartments, SetStockMinimo } from "@/libs/Requests";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -82,15 +82,24 @@ const CriarProdutoModal: React.FC<Props> = ({ visible, onClose }) => {
     })();
   }, [visible, reset]);
 
-  const onSubmit = async (formData: ProdutoForm) => {
-    try {
-      await CriarProduto(formData);
-      reset(EMPTY_FORM); // limpa após gravar
-      onClose();
-    } catch (e) {
-      console.error("Erro ao criar produto:", e);
+const onSubmit = async (formData: ProdutoForm) => {
+  try {
+    const created = await CriarProduto(formData);
+
+    // tenta obter o id do produto criado, indiferente da capitalização
+    const newId: number | undefined = created?.id ?? created?.Id ?? created?.produtoId;
+    if (typeof newId === "number") {
+      // estado 3, localização 1 (conforme regras)
+      const minimo = Number(formData.stockMinimo || 0);
+      await SetStockMinimo(newId, 1, 3, minimo);
     }
-  };
+
+    reset(EMPTY_FORM);
+    onClose();
+  } catch (e) {
+    console.error("Erro ao criar produto:", e);
+  }
+};
 
   const onCancel = () => {
     reset(EMPTY_FORM); // limpa ao cancelar

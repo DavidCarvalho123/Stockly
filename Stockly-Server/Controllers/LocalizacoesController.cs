@@ -112,6 +112,17 @@ namespace Stockly_Server.Controllers
             }
             return Ok();
         }
+        
+        [HttpGet("GetAllLocalizacoes")]
+        public IActionResult GetAllLocalizacoes()
+        {
+            using var context = new StocklyContext();
+            var local = context.Localizacoes
+                .Select(l=> new {l.Id, l.Nome})
+                .ToList();
+        
+            return Ok(local);
+        }
     }
 
     public class LocalizacoesShow

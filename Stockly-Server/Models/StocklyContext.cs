@@ -280,9 +280,6 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
             entity.Property(e => e.Nome).HasMaxLength(100);
             entity.Property(e => e.PrecoCompra).HasDefaultValueSql("'NULL'");
             entity.Property(e => e.PrecoVenda).HasDefaultValueSql("'NULL'");
-            entity.Property(e => e.QuantidadeMinimaPedido)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("int(11)");
             entity.Property(e => e.TipoUnidade)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("'NULL'");
