@@ -27,15 +27,17 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
         }
     }
 
-    const refOutside = useClickOutside<View>(() => {
+    const refOutsideProd = useClickOutside<View>(() => {
         setProdutosDropdown(false);
+    });
+    const refOutsidePed = useClickOutside<View>(() => {
         setPedidosDropdown(false);
     });
 
     return(
         <>
-            <SafeAreaView style={styles.container} ref={refOutside}>
-                <View style={styles.buttonContainer}>
+            <SafeAreaView style={styles.container} >
+                <View style={styles.buttonContainer} ref={refOutsideProd}>
                     <Pressable style={Style.mobileButtonPrimary} onPress={openDropdown('produtos')}>
                         <Text style={Style.mobileTextButtonPrimary}>Produtos</Text>
                     </Pressable>
@@ -55,7 +57,7 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
                     </View>
                 </View>
 
-                <View style={styles.buttonContainer}>
+                <View style={styles.buttonContainer} ref={refOutsidePed}>
                     <Pressable style={Style.mobileButtonPrimary} onPress={openDropdown('pedidos')}>
                         <Text style={Style.mobileTextButtonPrimary}>Pedidos</Text>
                     </Pressable>
@@ -89,7 +91,7 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
     );
 }
 
-export default React.memo(Navbar);
+export default Navbar;
 
 const styles = StyleSheet.create({
     container: {

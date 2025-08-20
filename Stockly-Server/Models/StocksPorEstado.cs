@@ -23,5 +23,7 @@ public partial class StocksPorEstado
 
     public virtual Localizaco? IdLocalizacaoNavigation { get; set; }
 
+    public virtual ICollection<LocalizacoesProduto> LocalizacoesProdutos { get; set; } = new List<LocalizacoesProduto>();
+
     public virtual Produto? IdProdutoNavigation { get; set; }
 }

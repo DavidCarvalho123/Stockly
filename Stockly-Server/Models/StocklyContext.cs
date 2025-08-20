@@ -37,6 +37,8 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
 
     public virtual DbSet<StocksPorEstado> StocksPorEstados { get; set; }
 
+    public virtual DbSet<LocalizacoesProduto> LocalizacoesProdutos { get; set; }
+
     public virtual DbSet<Utilizadore> Utilizadores { get; set; }
 
 
@@ -338,6 +340,38 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
                 .HasForeignKey(d => d.IdProduto)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("stocksporestado_ibfk_2");
+        });
+
+        modelBuilder.Entity<LocalizacoesProduto>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("LocalizacoesProdutos");
+
+            entity.HasIndex(e => e.IdLocalizacao, "IdLocalizacao");
+
+            entity.HasIndex(e => e.IdStocksPorEstado, "IdStocksPorEstado");
+
+            entity.Property(e => e.Id).HasColumnType("int(11)");
+            entity.Property(e => e.IdLocalizacao)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("int(11)");
+            entity.Property(e => e.IdStocksPorEstado)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("int(11)");
+            entity.Property(e => e.Quantidade)
+                .HasDefaultValueSql("'NULL'")
+                .HasColumnType("int(11)");
+
+            entity.HasOne(d => d.IdLocalizacaoNavigation).WithMany(p => p.LocalizacoesProdutos)
+                .HasForeignKey(d => d.IdLocalizacao)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_localizacoesprodutos_localizacoes");
+
+            entity.HasOne(d => d.IdStocksPorEstadoNavigation).WithMany(p => p.LocalizacoesProdutos)
+                .HasForeignKey(d => d.IdStocksPorEstado)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_localizacoesprodutos_stocksporestado");
         });
 
         modelBuilder.Entity<Utilizadore>(entity =>

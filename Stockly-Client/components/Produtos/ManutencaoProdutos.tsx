@@ -49,7 +49,9 @@ const FilterBox: React.FC<{
       onBlur={() => setFocused(false)}
     />
   );
-};
+    };
+
+const ProdutosHeaders = ['EAN', 'Nome', 'Departamento', 'Unidade', 'Preço Venda', 'IVA', 'Ativo'];
 
 /* ---------- Página ---------- */
 
@@ -123,7 +125,7 @@ const ManutencaoProdutos: React.FC = () => {
     ),
     [filters]
   );
-
+if (Platform.OS === 'web')
   return (
     <>
       {/* Botão Criar */}
@@ -244,12 +246,44 @@ const ManutencaoProdutos: React.FC = () => {
         )}
       </SafeAreaView>
     </>
-  );
+        );
+else
+    return (
+        <SafeAreaView>
+            {products &&
+                <FlatList data={products}
+                    renderItem={({ item }) => <Item key={item.id} item={item} />} />
+            }
+        </SafeAreaView>
+    );
 };
 
 export default ManutencaoProdutos;
 
-/* ====== ESTILOS ====== */
+interface ItemProps{
+    item: ProdutosManutencao
+}
+const Item = ({item}:ItemProps) => {
+    return(
+        <View style={[styles.itemContainer]}>
+                <View style={[styles.itemLeft]}>
+                    <Text><Text style={styles.headerItem}>EAN:</Text> {item.ean}</Text>
+                    <Text><Text style={styles.headerItem}>Nome:</Text> {item.nome}</Text>
+                    <Text ><Text style={styles.headerItem}>Departamento:</Text> {item.departamento}</Text>
+                    <Text><Text style={styles.headerItem}>Fornecedor:</Text> {item.departamento}</Text>
+                </View>
+                <View style={styles.itemRight}>
+                    <Text><Text style={styles.headerItem}>Unidade:</Text> {item.tipoUnidade}</Text>
+                    <Text><Text style={styles.headerItem}>Preço Venda:</Text> {item.precoVenda} €</Text>
+                    <View style={styles.checkboxItem}>
+                        <Text style={[styles.headerItem, {marginTop: 1}]}>Ativo:</Text>
+                        {item.ativo ? <AntDesign name="check" size={20} color="green" /> : <AntDesign name="close" size={20} color="#ec1f1fff" />}
+                    </View>
+                    <MaterialIcons style={{marginTop:'auto'}} name="inventory" size={24} color="black" />
+                </View>
+        </View>
+    );
+}
 
 const ROW_BORDER = "#e6e6e6";
 const HEADER_BG = "#f5f5f5";
@@ -258,6 +292,102 @@ const ROW_H = 56;
 const FILTER_H = 40;
 
 const styles = StyleSheet.create({
+  container: {
+      flex: 1,
+      padding: 10
+   },
+   tableColumnHeader: {
+      alignItems: "center",
+      backgroundColor: Colours.sidebarGrey,
+      flex: 5,
+      justifyContent: "center",
+      borderWidth: StyleSheet.hairlineWidth
+   },
+   tableBodyCell: {
+      alignItems: "center",
+      flex: 3,
+      justifyContent: "center",
+      margin: 1,
+      borderWidth: StyleSheet.hairlineWidth
+   },
+   tableColumnTotals: {
+      alignItems: "center",
+      flex: 2,
+      justifyContent: "center",
+      margin: 1
+   },
+   tableRow: {
+      flex: 5,
+      flexDirection: "row",
+      maxHeight: 30,
+      
+   },
+   tableRowHeader: {
+      flex: 5,
+      flexDirection: "row",
+      maxHeight: 40
+   },
+   tableContainer: {
+      borderRadius: 5,
+      flex: 1,
+      marginTop: 0,
+      padding: 10
+   },
+   textHeader: {
+      color: "#000000",
+      fontWeight: "bold"
+    },
+    textHeaderSubTitle: {
+        fontSize: 12
+    },
+    textLineItem: {
+        color: "#000000"
+    },
+    buttonMpPrimary: {
+      width: 90,
+      borderRadius: 20,
+      padding: 10,
+      marginBottom: 0,
+      marginTop: 20,
+      marginLeft: 20,
+      boxShadow: "0 2px 4px darkslategray"
+    },
+    itemContainer: {
+        backgroundColor: Colours.sidebarGrey,
+        borderWidth: 1,
+        borderRadius: 5,
+        marginLeft: 30,
+        marginRight: 30,
+        marginBottom: 30,
+        padding: 20,
+        display:'flex',
+        flexDirection:'row'
+    },
+    headerItem:{
+        fontWeight: 'bold'
+    },
+    itemLeft:{
+        width: '50%',
+        gap: 1,
+        zIndex: 999
+    },
+    itemRight:{
+        width: '50%',
+        display:'flex',
+        alignItems: 'flex-end',
+        gap: 1
+    },
+    ativoItem:{
+        height: 100
+    },
+    checkboxItem:{
+        display:'flex',
+        flexDirection: 'row'
+    },
+    inventoryIcon:{
+        display:'flex',
+        alignSelf:'flex-end'
+    },
   pagePad: { flex: 1, paddingHorizontal: 10, paddingTop: 10 },
 
   tableBox: {
@@ -334,14 +464,6 @@ const styles = StyleSheet.create({
 
   rowEven: { backgroundColor: "#fff" },
   rowOdd: { backgroundColor: "#fbfbfb" },
-
-  buttonMpPrimary: {
-    width: 90,
-    borderRadius: 20,
-    padding: 10,
-    marginTop: 20,
-    marginLeft: 20,
-  },
 
   btnSmallReset: {
     marginTop: 0,
