@@ -16,8 +16,17 @@ public partial class LinhasPedido
     public bool? Processado { get; set; }
 
     public DateTime? DataPedido { get; set; }
+    
+    public int EstadoInicial { get; set; }
+    
+    public int EstadoFinal { get; set; }
 
     public virtual Pedido? IdPedidoNavigation { get; set; }
-
     public virtual Produto? IdProdutoNavigation { get; set; }
+    
+    public virtual Estado? EstadoInicialNavigation { get; set; }
+    
+    public virtual Estado? EstadoFinalNavigation { get; set; }
+    
+  
 }

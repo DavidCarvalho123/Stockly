@@ -1,21 +1,17 @@
+import { GetStocksByProduto } from "@/libs/Requests";
+import Style from "@/libs/Style";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Modal,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import Style from "@/libs/Style";
 
-// 👉 estes 2 já existem no teu Requests; usamos só o de stocks.
-// Para não depender de alterações noutros ficheiros, as listagens
-// de locais/estados são feitas aqui dentro com fetch direto.
-import { GetStocksByProduto } from "@/libs/Requests";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Token } from "@/models/Login";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const baseUrl = "http://localhost:8082/api/";
 

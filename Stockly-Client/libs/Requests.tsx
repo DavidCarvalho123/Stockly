@@ -2,7 +2,7 @@ import { renderedObjectsToSave } from "@/models/Localizacoes"; //funciona
 import { LoginForm, Token } from "@/models/Login";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://localhost:8082/api/'
+const baseUrl = 'http://localhost:8082/api/';
 
 // JWT-based login
 export const Login = async (loginForm:LoginForm) => {

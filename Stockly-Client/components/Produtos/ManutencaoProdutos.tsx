@@ -1,13 +1,15 @@
+import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
+import EditarProdutoModal from "@/components/Modals/EditarProdutoModal";
+import VerStockModal from "@/components/Modals/VerStockModal";
+import { Colours } from "@/libs/Constants";
 import { GetAllProducts } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { ProdutosManutencao } from "@/models/Produtos";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useEffect, useMemo, useState } from "react";
-import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CriarProdutoModal from "@/components/Modals/CriarProdutoModal";
-import EditarProdutoModal from "@/components/Modals/EditarProdutoModal";
-import { Colours } from "@/libs/Constants";
-import VerStockModal from "@/components/Modals/VerStockModal";
 
 // ---- Definição única das colunas ----
 const COLS: { key: keyof ProdutosManutencao | "acao"; label: string; flex: number; filterable?: boolean }[] = [

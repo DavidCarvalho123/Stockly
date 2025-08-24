@@ -100,7 +100,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 10,
-        zIndex: 10
+        zIndex: 10,
+        height: 100,
+        paddingTop: 10
     },
     currentBodyTitle: {
         fontSize: 40,
@@ -112,7 +114,8 @@ const styles = StyleSheet.create({
         paddingTop:47
     },
     buttonContainer: {
-        width: '30%'
+        width: '30%',
+        height: '100%'
     },
     dropdown: {
         display: 'flex',

@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
 import { Colours } from "@/libs/Constants";
+import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
     StocklyTitle: {
@@ -40,10 +40,11 @@ export default StyleSheet.create({
     },
     mobileButtonPrimary: {
         backgroundColor: '#ffffff',
-        paddingTop: 10,
-        paddingBottom: 10,
+        paddingTop: 8,
+        paddingBottom: 0,
         borderRadius: 30,
-        width: '100%'
+        width: '100%',
+        height:36
     },
     mobileTextButtonPrimary:{
         textAlign: 'center',
