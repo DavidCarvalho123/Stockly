@@ -1,3 +1,5 @@
+import { GetAllLocals, GetAllStates, GetStocksByProduto } from "@/libs/Requests";
+import Style from "@/libs/Style";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
@@ -7,17 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import Style from "@/libs/Style";
-
-// 👉 estes 2 já existem no teu Requests; usamos só o de stocks.
-// Para não depender de alterações noutros ficheiros, as listagens
-// de locais/estados são feitas aqui dentro com fetch direto.
-import { GetStocksByProduto } from "@/libs/Requests";
-
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Token } from "@/models/Login";
-
-const baseUrl = "http://localhost:8082/api/";
 
 type Props = {
   visible: boolean;
@@ -32,21 +23,6 @@ type StockRow = {
   estadoNome: string; // <- será preenchido com Estado1
   quantidade: number;
 };
-
-async function fetchAuthed<T = any>(path: string): Promise<T | null> {
-  try {
-    const auth = await AsyncStorage.getItem("jwtToken");
-    if (!auth) return null;
-    const tokenObj = JSON.parse(auth) as Token;
-    const resp = await fetch(baseUrl + path, {
-      headers: { Authorization: "Bearer " + tokenObj.token },
-    });
-    if (!resp.ok) return null;
-    return (await resp.json()) as T;
-  } catch {
-    return null;
-  }
-}
 
 const VerStockModal: React.FC<Props> = ({ visible, produtoId, onClose }) => {
   const [rows, setRows] = useState<StockRow[]>([]);
@@ -64,9 +40,10 @@ const VerStockModal: React.FC<Props> = ({ visible, produtoId, onClose }) => {
         // 2) Listas de locais e estados (arrays)
         //    - Localizacoes/GetAllLocalizacoes -> [{ Id, Nome }]
         //    - Estados/GetAllEstados          -> [{ Id, Estado1 }]
+        
         const [localsArr, statesArr] = await Promise.all([
-          fetchAuthed<any[]>("Localizacoes/GetAllLocalizacoes"),
-          fetchAuthed<any[]>("Estados/GetAllEstados"),
+          GetAllLocals(),
+          GetAllStates()
         ]);
 
         // 3) Construir dicionários de lookup
@@ -78,13 +55,14 @@ const VerStockModal: React.FC<Props> = ({ visible, produtoId, onClose }) => {
         });
 
         const estMap = new Map<number, string>();
+        
         (statesArr ?? []).forEach((e) => {
-  const id = (e?.Id ?? e?.id) as number;
-   // inclui também 'estado1' (camelCase por defeito no ASP.NET Core)
-   const nome = (e?.Estado1 ?? e?.estado1 ?? e?.nome ?? e?.estado ?? e?.Estado) as string;
- if (id != null) estMap.set(id, nome ?? `Estado ${id}`);
-});
-
+          const id = (e?.Id ?? e?.id) as number;
+          // inclui também 'estado1' (camelCase por defeito no ASP.NET Core)
+          const nome = (e?.Estado1 ?? e?.estado1 ?? e?.nome ?? e?.estado ?? e?.Estado) as string;
+        if (id != null) estMap.set(id, nome ?? `Estado ${id}`);
+        });
+        
         // 4) Normalizar stocks e enriquecer com nomes
         const norm = (r: any) => {
           const idLoc =
@@ -121,6 +99,7 @@ const VerStockModal: React.FC<Props> = ({ visible, produtoId, onClose }) => {
   // Agrupar por localização e ordenar por estado
   const grouped = useMemo(() => {
     const m = new Map<number, { nome: string; linhas: StockRow[] }>();
+    
     rows.forEach((r) => {
       const g = m.get(r.localizacaoId) ?? { nome: r.localizacaoNome, linhas: [] };
       g.linhas.push(r);

@@ -16,7 +16,7 @@ public partial class Localizaco
 
     public int? LocalizacaoPai { get; set; }
 
-    public bool? ArmazemCentral { get; set; }
+    public bool ArmazemCentral { get; set; } = false;
     public bool? LocalReal { get; set; }
     public float? SizeX { get; set; }
     public float? SizeY { get; set; }

@@ -117,15 +117,44 @@ namespace Stockly_Server.Controllers
         public IActionResult GetAllLocalizacoes()
         {
             using var context = new StocklyContext();
-            var local = context.Localizacoes
+            var local = context.Localizacoes.Where(l => l.LocalReal == true)
                 .Select(l=> new {l.Id, l.Nome})
                 .ToList();
         
             return Ok(local);
         }
+
+        [HttpGet("GetLocalizacaoById/{localizacaoId}")]
+        public IActionResult GetLocalizacaoById(int localizacaoId)
+        {
+            LocalizacoesShow result = new LocalizacoesShow();
+            using (var context = new StocklyContext())
+            {
+                var local = context.Localizacoes.Where(l => l.Id == localizacaoId).FirstOrDefault();
+                string? localPai = context.Localizacoes.Where(l => l.Id == local.LocalizacaoPai).Select(l => l.Nome).FirstOrDefault();
+                result = new LocalizacoesShow()
+                {
+                    Nome = local.Nome,
+                    Morada = local.Morada,
+                    CodPostal = local.CodPostal,
+                    LocalizacaoPai = localPai,
+                    ArmazemCentral = local.ArmazemCentral,
+                    SizeX = local.SizeX,
+                    SizeZ = local.SizeZ
+                };
+            }
+            return Ok(result);
+        }
     }
 
     public class LocalizacoesShow
     {
+        public string Nome { get; set; }
+        public string Morada { get; set; }
+        public string CodPostal { get; set; }
+        public string? LocalizacaoPai { get; set; }
+        public bool ArmazemCentral { get; set; }
+        public float? SizeX { get; set; }
+        public float? SizeZ { get; set; }
     }
 }
