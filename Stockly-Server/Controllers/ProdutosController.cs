@@ -13,9 +13,6 @@ namespace Stockly_Server.Controllers
     {
         public ProdutosController() { }
 
-        // ============================
-        // GET: Todos os produtos
-        // ============================
         [HttpGet]
         [Route("GetAllProdutos")]
         public IActionResult GetAllProdutos()
@@ -40,9 +37,7 @@ namespace Stockly_Server.Controllers
             return Ok(results);
         }
 
-        // ============================
-        // GET: Produto por Id
-        // ============================
+        [HttpGet]
         [HttpGet("GetProdutoById/{id}")]
         public IActionResult GetProdutoById(int id)
         {
@@ -79,13 +74,8 @@ namespace Stockly_Server.Controllers
             });
         }
 
-
-        // ============================
-        // POST: Criar Produto
-        // ============================
         [HttpPost]
         [Route("CriarProduto")]
-        [Authorize]
         public IActionResult CriarProduto([FromBody] ProdutoFormModel model)
         {
             if (string.IsNullOrWhiteSpace(model.Nome) ||
@@ -132,12 +122,8 @@ namespace Stockly_Server.Controllers
             }
         }
 
-        // ============================
-        // PUT: Editar Produto
-        // ============================
         [HttpPut]
         [Route("EditarProduto/{id}")]
-        [Authorize]
         public IActionResult EditarProduto(int id, [FromBody] ProdutoFormModel model)
         {
             using var context = new StocklyContext();
@@ -169,99 +155,8 @@ namespace Stockly_Server.Controllers
             }
         }
 
-        // ============================
-        // GET: Departamentos
-        // ============================
-        [HttpGet]
-        [Route("GetAllDepartamentos")]
-        public IActionResult GetAllDepartamentos()
-        {
-            using var context = new StocklyContext();
-            var departamentos = context.Departamentos
-                .Select(d => new { d.Id, d.Nome })
-                .ToList();
-            return Ok(departamentos);
-        }
-
-        // ============================
-        // GET: Fornecedores
-        // ============================
-        [HttpGet]
-        [Route("GetAllFornecedores")]
-        public IActionResult GetAllFornecedores()
-        {
-            using var context = new StocklyContext();
-            var list = context.Fornecedores
-                .Select(f => new { f.Id, f.Nome })
-                .ToList();
-            return Ok(list);
-        }
-        
-        [HttpPut("SetStockMinimo")]
-        public IActionResult SetStockMinimo(int produtoId, int localId, int estado, int stockMinimo)
-        {
-            try
-            {
-                using (var context = new StocklyContext())
-                {
-                    var entry = context.StocksPorEstados
-                        .FirstOrDefault(s => s.IdProduto == produtoId && s.IdLocalizacao == localId && s.Estado == estado);
-
-                    if (entry == null)
-                    {
-                        entry = new StocksPorEstado
-                        {
-                            IdProduto = produtoId,
-                            IdLocalizacao = localId,
-                            Estado = estado,
-                            Quantidade = 0,
-                            StockMinimo = stockMinimo
-                        };
-                        context.StocksPorEstados.Add(entry);
-                    }
-                    else
-                    {
-                        entry.StockMinimo = stockMinimo;
-                    }
-
-                    context.SaveChanges();
-                    return Ok(entry);
-                }
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
-        }
-
-        [HttpGet("GetStocksByProduto/{produtoId}")]
-        public IActionResult GetStocksByProduto(int produtoId)
-        {
-            List<StocksPorEstado> results = new List<StocksPorEstado>();
-            try
-            {
-                using (var context = new StocklyContext())
-                {
-                    results = context.StocksPorEstados
-
-                        .Where(s => s.IdProduto == produtoId)
-                        .ToList();
-
-                }
-                    return Ok(results);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
-        }
-        
-        
     }
 
-    // ============================
-    // DTO para exibir produto na tabela
-    // ============================
     public class ProdutosShow
     {
         public int Id { get; set; }

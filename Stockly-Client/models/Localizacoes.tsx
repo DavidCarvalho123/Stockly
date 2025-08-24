@@ -38,3 +38,13 @@ export interface renderedObjectsToSave{
     localPai: number,
     position: {x:number,y:number,z:number}
 }
+
+export interface localizacaoForm{
+    nome: string,
+    morada: string,
+    codPostal: string,
+    localizacaoPai: string,
+    armazemCentral: boolean,
+    sizeX: number,
+    sizeZ: number
+}

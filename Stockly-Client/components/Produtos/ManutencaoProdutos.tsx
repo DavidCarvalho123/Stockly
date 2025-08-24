@@ -10,7 +10,6 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 // ---- Definição única das colunas ----
 const COLS: { key: keyof ProdutosManutencao | "acao"; label: string; flex: number; filterable?: boolean }[] = [
   { key: "ean",          label: "EAN",          flex: 1.6, filterable: true },
@@ -156,46 +155,46 @@ if (Platform.OS === 'web')
             >
               {COLS.map((c, i) => {
            if (c.key === "acao") {
-  return (
-    <View
-      key={`${p.id}-acao`}
-      style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
-    >
-      <View style={styles.actionRow}>
-        {/* Ver Stock primeiro */}
-        <Pressable
-          style={[
-            Style.buttonSecondary,
-            styles.btnSmallReset,
-            styles.btnSmall,
-            styles.shadow,
-          ]}
-          onPress={() => {
-            setViewStockId(p.id);
-            setViewStockVisible(true);
-          }}
-        >
-          <Text style={Style.textButtonSecondary}>Ver Stock</Text>
-        </Pressable>
+              return (
+                <View
+                  key={`${p.id}-acao`}
+                  style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
+                >
+                  <View style={styles.actionRow}>
+                    {/* Ver Stock primeiro */}
+                    <Pressable
+                      style={[
+                        Style.buttonSecondary,
+                        styles.btnSmallReset,
+                        styles.btnSmall,
+                        styles.shadow,
+                      ]}
+                      onPress={() => {
+                        setViewStockId(p.id);
+                        setViewStockVisible(true);
+                      }}
+                    >
+                      <Text style={Style.textButtonSecondary}>Ver Stock</Text>
+                    </Pressable>
 
-        {/* Editar depois, com espaçamento à esquerda */}
-        <Pressable
-          style={[
-            Style.buttonSecondary,
-            Style.editButton,
-            styles.btnSmallReset,
-            styles.btnSmall,
-            styles.shadow,
-            { marginLeft: 8 },
-          ]}
-          onPress={() => setEditId(p.id)}
-        >
-          <Text style={Style.textButtonSecondary}>Editar</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
+                    {/* Editar depois, com espaçamento à esquerda */}
+                    <Pressable
+                      style={[
+                        Style.buttonSecondary,
+                        Style.editButton,
+                        styles.btnSmallReset,
+                        styles.btnSmall,
+                        styles.shadow,
+                        { marginLeft: 8 },
+                      ]}
+                      onPress={() => setEditId(p.id)}
+                    >
+                      <Text style={Style.textButtonSecondary}>Editar</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              );
+            }
 
 
                 const val =
