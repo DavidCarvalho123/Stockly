@@ -5,6 +5,12 @@
         public FurnitureTypes Obj { get; set; }
         public int LocalPai { get; set; }
         public Position Position { get; set; }
+        public float Rotation { get; set; }
+    }
+    public class Space
+    {
+        public Position Coords { get; set; }
+        public float Rotation { get; set; }
     }
     public class Position
     {

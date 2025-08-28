@@ -3,6 +3,7 @@ import Style from "@/libs/Style";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -118,7 +119,7 @@ const VerStockModal: React.FC<Props> = ({ visible, produtoId, onClose }) => {
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.overlay}>
-        <View style={styles.modal}>
+        <View style={[styles.modal,Platform.OS === 'web' ? {width: '20%'} : {width: '90%'}]}>
           <Text style={styles.title}>Stock por Localização</Text>
 
           <ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
@@ -175,7 +176,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderRadius: 12,
     padding: 20,
-    width: "20%",
     maxHeight: "90%",
   },
   title: {

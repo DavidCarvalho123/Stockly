@@ -1,9 +1,15 @@
 import { Colours } from "@/libs/Constants";
-import { GetAllLocals, GetStocksInventory } from "@/libs/Requests";
-import { StocksInventario } from "@/models/Stocks";
+import { GetAllLocals, GetStocksInventory, UpdateInventory } from "@/libs/Requests";
+import Style from "@/libs/Style";
+import { InventoryForm, StocksInventario } from "@/models/Stocks";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Picker } from "@react-native-picker/picker";
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useEffect, useMemo, useState } from "react";
-import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { ActivityIndicator, Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useClickOutside } from "react-native-click-outside";
+import { Dropdown } from 'react-native-element-dropdown';
 
 const Label: React.FC<{ text: string; required?: boolean }> = ({ text, required }) => (
   <Text style={styles.label}>
@@ -16,19 +22,30 @@ const CellText: React.FC<{ text: string }> = ({ text }) => (
     {text}
   </Text>
 );
-const COLS: { key: keyof StocksInventario | "acao"; label: string; flex: number; filterable?: boolean }[] = [
-  { key: "ean",          label: "EAN",          flex: 1.6, filterable: true },
-  { key: "nome",         label: "Nome",         flex: 2.0, filterable: true },
-  { key: "stockAnt1",    label: "Stock Anterior Frente de Loja", flex: 0.8, filterable: false },
-  { key: "stockPic1",  label: "Stock Picado Frente de Loja",      flex: 0.8, filterable: false },
-  { key: "stockReal1",   label: "Stock Real Frente de Loja",  flex: 0.8, filterable: false },
-  { key: "stockAnt2",          label: "Stock Anterior Armazém",          flex: 0.8, filterable: false },
-  { key: "stockPic2",        label: "Stock Picado Armazém",        flex: 0.8, filterable: false },
-  { key: "stockReal2",         label: "Stock Real Armazém",             flex: 0.8, filterable: false }, // ↑ mais largo para 2 botões
+const COLS: { key: keyof StocksInventario | "acao"; label: string; flex: number; filterable?: boolean; editable?: boolean; }[] = [
+  { key: "ean",          label: "EAN",          flex: 1.0, filterable: true },
+  { key: "nome",         label: "Nome",         flex: 1.5, filterable: true },
+  { key: "departamento",   label: "Departamento",  flex: 1.5, filterable: true},
+  { key: "stockAnt1",    label: "Stock Anterior Frente de Loja", flex: 0.7, filterable: false },
+  { key: "stockPic1",  label: "Stock Picado Frente de Loja",      flex: 0.7, filterable: false, editable: true },
+  { key: "stockReal1",   label: "Stock Real Frente de Loja",  flex: 0.7, filterable: false,editable:true },
+  { key: "stockAnt2",          label: "Stock Anterior Armazém",          flex: 0.7, filterable: false },
+  { key: "stockPic2",        label: "Stock Picado Armazém",        flex: 0.7, filterable: false,editable:true },
+  { key: "stockReal2",         label: "Stock Real Armazém",             flex: 0.7, filterable: false,editable:true }, 
+  { key: "stock3",         label: "Stock Em Trânsito",             flex: 0.7, filterable: false }, 
+  { key: "stock4",         label: "Stock Em Reparação",             flex: 0.7, filterable: false }, 
 ];
 const TOTAL_FLEX = COLS.reduce((s, c) => s + c.flex, 0);
 const COL_WIDTHS = COLS.map((c) => `${(c.flex / TOTAL_FLEX) * 100}%`);
 const ACCENT = Colours.stocklyBlue;
+
+const shadow = {
+  ...Platform.select({
+    ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 },
+    android: { elevation: 5 },
+    web: { boxShadow: "0 2px 6px rgba(0,0,0,0.25)" as any },
+  }),
+};
 
 const FilterBox: React.FC<{
   value: string;
@@ -49,14 +66,33 @@ const FilterBox: React.FC<{
   );
     };
 
+  interface PreForm{
+    values: InventoryForm[]
+  }
+  interface MobileForm{
+    ean: string,
+    state: number,
+    quantity: number
+  }
+
 const Inventario:React.FC = () => {
     const [localizacoes, setLocalizacoes] = useState<{ id: number; nome: string }[]>([]);
     const [stocksProd, setStocksProds] = useState<StocksInventario[]>([]);
     const [filtered, setFiltered] = useState<StocksInventario[]>([]);
     const [filters, setFilters] = useState<Record<string, string>>({});
-
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const [selectedLocal, setSelectedLocal] = useState<number>()
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+    const [permission, requestPermission] = useCameraPermissions();
+    const [cameraActive, setCameraActive] = useState<boolean>(false);
+    const refOutside = useClickOutside<TextInput>(() => {
+      Keyboard.dismiss();
+    });
+
+    const { setValue, control, handleSubmit, reset, formState: { errors } } = useForm<PreForm>();
+    const { setValue: setValueMobile, control: controlMobile, handleSubmit: handleSubmitMobile, reset: resetMobile, formState: {errors: errorsMobile}} = useForm<MobileForm>()
+    const { fields, insert } = useFieldArray({ control, name: "values"})
 
     useEffect(() => {
         (async () => {
@@ -73,10 +109,21 @@ const Inventario:React.FC = () => {
         (async () => {
             try{
                 if(selectedLocal !== undefined){
-                    const data = await GetStocksInventory(selectedLocal as number);
+                    const data = await GetStocksInventory(selectedLocal as number) as StocksInventario[];
                     if(data !== null){
-                        setStocksProds(data);
-                        setFiltered(data);
+                      setStocksProds(data);
+                      setFiltered(data);
+                      var inventoryForm: InventoryForm[] = [];
+                      data.forEach((stock) => {
+                        inventoryForm.push({
+                          produtoId: stock.id,
+                          stockReal1: stock.stockReal1?? 0,
+                          stockPic1: stock.stockPic1?? 0,
+                          stockReal2: stock.stockReal2?? 0,
+                          stockPic2: stock.stockPic2?? 0
+                        });
+                      });
+                      reset({values: inventoryForm});
                     }
                 }
             }
@@ -87,9 +134,24 @@ const Inventario:React.FC = () => {
       }, [selectedLocal])
 
     const onchangeLocals = (itemValue: any, itemIndex: number) => {
-        setSelectedLocal(itemIndex)
+      console.log(itemValue)
+        setSelectedLocal(itemValue)
     }
 
+    const onSubmit = async (data: PreForm) => {
+      setIsProcessing(true);
+      try{
+        if(selectedLocal !== undefined){
+          await UpdateInventory(selectedLocal,data.values);
+        }
+      }
+      catch(e) {
+        console.error("Erro a atualizar o inventário: ", e)
+      }
+      finally{
+        setIsProcessing(false);
+      }
+    }
 
     const Header = useMemo(
         () => (
@@ -138,68 +200,233 @@ const Inventario:React.FC = () => {
           ),
           [filters]
         );
-    return ( 
-        <>
-            <View>
 
-                <View style={styles.inputTopSide}>
-                    <View style={styles.inputWrapper}>
-                        <Label text="Localização" />
-                        <View style={[
-                            styles.pickerBox,
-                            focusedField === "localizacoes" && styles.inputFocused
-                        ]}>
-                            <Picker
-                                onValueChange={onchangeLocals}
-                                style={styles.pickerInner}
-                                dropdownIconColor="#5F5F5F"
-                                onFocus={() => setFocusedField("localizacoes")}
-                                onBlur={() => setFocusedField(null)}
-                                >
-                                <Picker.Item label="" value="" />
-                                {localizacoes.map((loc) => (
-                                    <Picker.Item key={loc.id} label={loc.nome} value={String(loc.id)} />
-                                ))}
-                            </Picker>
-                        </View>
-                    </View>
+    if(Platform.OS === 'web'){
+      return ( 
+          <>
+              <View>
+  
+                  <View style={styles.inputTopSide}>
+                      <View style={styles.inputWrapper}>
+                          <Label text="Localização" />
+                          <View style={[
+                              styles.pickerBox,
+                              focusedField === "localizacoes" && styles.inputFocused
+                          ]}>
+                              <Picker
+                                  onValueChange={onchangeLocals}
+                                  style={styles.pickerInner}
+                                  dropdownIconColor="#5F5F5F"
+                                  onFocus={() => setFocusedField("localizacoes")}
+                                  onBlur={() => setFocusedField(null)}
+                                  >
+                                  <Picker.Item label="" value="" />
+                                  {localizacoes.map((loc) => (
+                                      <Picker.Item key={loc.id} label={loc.nome} value={String(loc.id)} />
+                                  ))}
+                              </Picker>
+                          </View>
+                      </View>
+                  </View>
+  
+                  <View>
+                      <View style={styles.pagePad}>
+                          <View style={styles.tableBox}>
+                              {Header}
+                              {FilterRow}
+                  
+                              {filtered.map((p, idx) => (
+                              <View
+                                  key={p.id}
+                                  style={[
+                                  styles.dataRow,
+                                  idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
+                                  ]}
+                              >
+                                  {COLS.map((c, i) => {
+                                  const val = String((p as any)[c.key] ?? "");
+  
+                                  if(!c.editable){
+                                    return (
+                                        <View
+                                        key={`${p.id}-${c.key}`}
+                                        style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
+                                        >
+                                        <CellText text={val} />
+                                        </View>
+                                    );
+                                  }
+                                  else{
+                                    var stockRowForm = fields.findIndex(f => f.produtoId == p.id);
+                                    if(stockRowForm === -1) return null;
+                                    
+                                    if(c.key == 'stockPic1'){
+                                      return (
+                                        <Controller 
+                                          control={control}
+                                          name={`values.${stockRowForm}.stockPic1`}
+                                          defaultValue={0}
+                                          rules={{validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),}}
+                                          render={({ field: { onChange, value} }) => (
+                                            <TextInput 
+                                              onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal1`,Number(text) || 0)}} 
+                                              value={value?.toString()?? "0"} 
+                                              keyboardType="numeric" 
+                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                            />
+                                          )}
+                                          />
+                                      );
+                                    }
+                                    else if(c.key == 'stockPic2'){
+                                      return (
+                                        <Controller 
+                                          control={control}
+                                          name={`values.${stockRowForm}.stockPic2`}
+                                          defaultValue={0}
+                                          render={({ field: { onChange, value} }) => (
+                                            <TextInput 
+                                              onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal2`,Number(text) || 0) }} 
+                                              value={value?.toString()?? "0"} 
+                                              keyboardType="numeric" 
+                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                            />
+                                          )}
+                                          />
+                                      );
+                                    }
+                                    else if(c.key == 'stockReal1'){
+                                      return (
+                                        <Controller 
+                                          control={control}
+                                          name={`values.${stockRowForm}.stockReal1`}
+                                          defaultValue={0}
+                                          render={({ field: { onChange, value} }) => (
+                                            <TextInput 
+                                              onChangeText={(text) => onChange(Number(text) || 0)} 
+                                              value={value?.toString()?? "0"} 
+                                              keyboardType="numeric" 
+                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                            />
+                                          )}
+                                          />
+                                      );
+                                    }else if(c.key == 'stockReal2'){
+                                      return (
+                                        <Controller 
+                                          control={control}
+                                          name={`values.${stockRowForm}.stockReal2`}
+                                          defaultValue={0}
+                                          render={({ field: { onChange, value} }) => (
+                                            <TextInput 
+                                              onChangeText={(text) => onChange(Number(text) || 0)} 
+                                              value={value?.toString()?? "0"} 
+                                              keyboardType="numeric" 
+                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                            />
+                                          )}
+                                          />
+                                      );
+                                    }
+  
+                                  }
+                                  })}
+                              </View>
+                              ))}
+                          </View>
+                      </View>
+                  </View>
+  
+                  <View style={styles.saveInventory}>
+                    <ActivityIndicator size="large" animating={isProcessing} style={{justifyContent: 'flex-start'}}  />
+                    <TouchableOpacity style={[Style.buttonSecondary, shadow]} disabled={selectedLocal === undefined} onPress={handleSubmit(onSubmit)}>
+                        <Text style={styles.textPrimary}>Guardar</Text>
+                    </TouchableOpacity>
+                  </View>
+  
+              </View>
+          </>
+      );
+    }
+    else{
+      if(!permission){
+        return <View/>;
+      }
+
+      if(!permission.granted){
+        return (
+        <View style={styles.container}>
+          <Text style={styles.message}>É necessário permissões para aceder à camera.</Text>
+          <Button onPress={requestPermission} title="Permitir utilização" />
+        </View>
+      );
+      }
+
+      const toggleCameraState = () => {
+        setCameraActive(!cameraActive);
+      }
+      
+      return(
+        
+            <View style={{flex:1}}>
+              
+                <View style={dropdownStyles.container}>
+                  <Text style={[dropdownStyles.label, focusedField === 'localizacoes' && { color: 'blue' }]}>
+                    Localização
+                  </Text>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'localizacoes' && { borderColor: 'blue' }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={localizacoes}
+                    value={selectedLocal}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("localizacoes")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      console.log(item)
+                      onchangeLocals(item.id,item.nome);
+                    }}
+                  />
                 </View>
-
-                <View>
-                    <View style={styles.pagePad}>
-                        <View style={styles.tableBox}>
-                            {Header}
-                            {FilterRow}
-                
-                            {filtered.map((p, idx) => (
-                            <View
-                                key={p.id}
-                                style={[
-                                styles.dataRow,
-                                idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
-                                ]}
-                            >
-                                {COLS.map((c, i) => {
-                                const val = String((p as any)[c.key] ?? "");
-                
-                                return (
-                                    <View
-                                    key={`${p.id}-${c.key}`}
-                                    style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
-                                    >
-                                    <CellText text={val} />
-                                    </View>
-                                );
-                                })}
-                            </View>
-                            ))}
-                        </View>
-                    </View>
+                <View style={[dropdownStyles.container,{width: '70%'}]}>
+                  <Label text="EAN" />
+                  <Controller
+                    control={controlMobile}
+                    name={'ean'}
+                    render={({ field: { onChange, value, onBlur } }) => {
+                      return(
+                      <View style={{ display:'flex',flexDirection:'row' }}>
+                        <TextInput
+                          ref={refOutside}
+                          style={[
+                            styles.input,
+                          errorsMobile.ean && styles.inputError,
+                            focusedField === 'ean' && styles.inputFocused, {flex: 5}
+                          ]}
+                          onChangeText={onChange}
+                          value={value?? ""}
+                          onBlur={() => { onBlur(); setFocusedField(null); }}
+                          onFocus={() => setFocusedField('ean')}
+                        />
+                        <TouchableOpacity style={styles.buttonView} onPress={toggleCameraState}>
+                              <FontAwesome6 name="barcode" size={24} color="black" />
+                          </TouchableOpacity>
+                      </View>
+                    )}}
+                  />
                 </View>
-
+                { cameraActive &&
+                  <CameraView barcodeScannerSettings={{ barcodeTypes: ['ean13','ean8','code128','code39','code93','codabar']}} onBarcodeScanned={(barcode) => {console.log(barcode);setValueMobile('ean',barcode.data)}} style={{ height: '100%'}} facing={'back'} />
+                }
             </View>
-        </>
-    );
+          
+        
+      );
+    }
 }
 
 export default Inventario;
@@ -209,7 +436,65 @@ const HEADER_BG = "#f5f5f5";
 
 const ROW_H = 56;
 const FILTER_H = 40;
+const dropdownStyles = StyleSheet.create({
+  container: {
+      padding: 16,
+    },
+    dropdown: {
+      backgroundColor: 'white',
+      height: 50,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    icon: {
+      marginRight: 5,
+    },
+    label: {
+      position: 'absolute',
+      backgroundColor: '#fafafa',
+      left: 22,
+      top: 8,
+      zIndex: 999,
+      paddingHorizontal: 8,
+      fontSize: 14,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+    },
+});
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  buttonView: {
+        justifyContent:'center',
+        alignItems: 'center'
+    },
+  message: {
+    textAlign: 'center',
+    paddingBottom: 10,
+  },
+    saveInventory: {
+      flexDirection: "row", 
+      justifyContent: "flex-end",
+      marginTop: 20, 
+      gap: 20,
+      marginRight: 20
+    },
     inputTopSide: {
         marginLeft: 30,
         marginTop: 20
@@ -298,6 +583,7 @@ const styles = StyleSheet.create({
     outlineStyle: "none" as any,
     outlineWidth: 0,
     outlineColor: "transparent",
+    marginRight: 20
   },
   inputFocused: {
     borderColor: Colours.stocklyBlue,

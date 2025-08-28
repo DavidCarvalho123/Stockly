@@ -23,11 +23,18 @@ namespace Stockly_Server.Controllers
             {
                 results = context.Localizacoes.Where(l => l.LocalReal == true).ToList();
                 var lookupHash = results.ToLookup(l => l.LocalizacaoPai);
-                results = results.Where(l => l.LocalizacaoPai == null).ToList();
-                foreach(var local in results)
+
+                List<Localizaco> BuildTree(int? parentId)
                 {
-                    local.SubLocalizacao = lookupHash[local.Id].ToList();
+                    return lookupHash[parentId]
+                        .Select(l => {
+                            l.SubLocalizacao = BuildTree(l.Id); // recursion
+                            return l;
+                        })
+                        .ToList();
                 }
+
+                results = BuildTree(null);
             }
             return Ok(results);
         }
@@ -78,7 +85,8 @@ namespace Stockly_Server.Controllers
                             SizeZ = obj.Obj.SizeZ,
                             CoordX = obj.Position.X,
                             CoordY = obj.Position.Y,
-                            CoordZ = obj.Position.Z
+                            CoordZ = obj.Position.Z,
+                            Rotation = obj.Rotation
                         };
                         context.Add(objDb);
                     }
@@ -94,16 +102,17 @@ namespace Stockly_Server.Controllers
 
         [HttpPatch]
         [Route("UpdatePosObject")]
-        public IActionResult UpdatePosObject(int localId, [FromBody] Position newCoords)
+        public IActionResult UpdatePosObject(int localId, [FromBody] Space newCoords)
         {
             try
             {
                 using (var context = new StocklyContext())
                 {
                     context.Localizacoes.Where(l => l.Id == localId).ExecuteUpdate(u => u
-                                                                    .SetProperty(l => l.CoordX, newCoords.X)
-                                                                    .SetProperty(l => l.CoordY, newCoords.Y)
-                                                                    .SetProperty(l => l.CoordZ,newCoords.Z));
+                                                                    .SetProperty(l => l.CoordX, newCoords.Coords.X)
+                                                                    .SetProperty(l => l.CoordY, newCoords.Coords.Y)
+                                                                    .SetProperty(l => l.CoordZ,newCoords.Coords.Z)
+                                                                    .SetProperty(l => l.Rotation, newCoords.Rotation));
                 }
             }
             catch(Exception e)
@@ -131,19 +140,77 @@ namespace Stockly_Server.Controllers
             using (var context = new StocklyContext())
             {
                 var local = context.Localizacoes.Where(l => l.Id == localizacaoId).FirstOrDefault();
-                string? localPai = context.Localizacoes.Where(l => l.Id == local.LocalizacaoPai).Select(l => l.Nome).FirstOrDefault();
                 result = new LocalizacoesShow()
                 {
                     Nome = local.Nome,
                     Morada = local.Morada,
                     CodPostal = local.CodPostal,
-                    LocalizacaoPai = localPai,
+                    LocalizacaoPai = local.LocalizacaoPai,
                     ArmazemCentral = local.ArmazemCentral,
                     SizeX = local.SizeX,
                     SizeZ = local.SizeZ
                 };
             }
             return Ok(result);
+        }
+
+        [HttpPut]
+        [Route("EditarLocalizacao/{id}")]
+        public IActionResult EditarLocalizacao(int id, [FromBody] LocalizacoesShow model)
+        {
+            using var context = new StocklyContext();
+            var local = context.Localizacoes.FirstOrDefault(p => p.Id == id);
+
+            if (local == null) return NotFound(new { message = "Produto não encontrado" });
+
+            try
+            {
+                local.Nome = model.Nome;
+                local.Morada = model.Morada;
+                local.CodPostal = model.CodPostal;
+                local.LocalizacaoPai = model.LocalizacaoPai == 0 ? null : model.LocalizacaoPai;
+                local.ArmazemCentral = model.ArmazemCentral ? true : false;
+                local.SizeX = model.SizeX ?? null;
+                local.SizeZ = model.SizeZ ?? null;
+                context.SaveChanges();
+                return Ok(new { message = "Produto atualizado com sucesso!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao atualizar produto", error = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [Route("CriarLocalizacao")]
+        public IActionResult CriarLocalizacao([FromBody] LocalizacoesShow model)
+        {
+            try
+            {
+                using (var context = new StocklyContext())
+                {
+                    var local = new Localizaco
+                    {
+                        Nome = model.Nome,
+                        Morada = model.Morada,
+                        CodPostal = model.CodPostal,
+                        LocalizacaoPai = model.LocalizacaoPai == 0 ? null : model.LocalizacaoPai,
+                        ArmazemCentral = model.ArmazemCentral,
+                        LocalReal = true,
+                        SizeX = model.SizeX,
+                        SizeZ = model.SizeZ
+                    };
+
+                    context.Localizacoes.Add(local);
+                    context.SaveChanges();
+
+                    return Ok(new { message = "Produto criado com sucesso!", local.Id });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao criar produto", error = ex.Message });
+            }
         }
     }
 
@@ -152,7 +219,7 @@ namespace Stockly_Server.Controllers
         public string Nome { get; set; }
         public string Morada { get; set; }
         public string CodPostal { get; set; }
-        public string? LocalizacaoPai { get; set; }
+        public int? LocalizacaoPai { get; set; }
         public bool ArmazemCentral { get; set; }
         public float? SizeX { get; set; }
         public float? SizeZ { get; set; }

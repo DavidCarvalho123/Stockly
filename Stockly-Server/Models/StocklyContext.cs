@@ -120,9 +120,6 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
             entity.Property(e => e.Data)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("datetime");
-            entity.Property(e => e.IdPedidosProdutos)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("int(11)");
             entity.Property(e => e.IdStockEstado)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)");

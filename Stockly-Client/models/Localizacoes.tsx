@@ -12,6 +12,7 @@ export interface TreeLocals{
     coordX?: number;
     coordY?: number;
     coordZ?: number;
+    rotation?: number;
     subLocalizacao: TreeLocals[];
 }
 
@@ -36,14 +37,15 @@ export interface FurnitureTypes{
 export interface renderedObjectsToSave{
     obj: FurnitureTypes,
     localPai: number,
-    position: {x:number,y:number,z:number}
+    position: {x:number,y:number,z:number},
+    rotation: number
 }
 
 export interface localizacaoForm{
     nome: string,
     morada: string,
     codPostal: string,
-    localizacaoPai: string,
+    localizacaoPai: number,
     armazemCentral: boolean,
     sizeX: number,
     sizeZ: number

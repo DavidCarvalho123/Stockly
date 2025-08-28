@@ -1,7 +1,7 @@
 import { Colours } from "@/libs/Constants";
 import Style from "@/libs/Style";
 import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useClickOutside } from "react-native-click-outside";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,7 +37,12 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
     return(
         <>
             <SafeAreaView style={styles.container} >
-                <View style={styles.buttonContainer} ref={refOutsideProd}>
+                <View style={styles.titleContainer}>
+                    <Text style={Style.StocklyTitle}>
+                        Stockly
+                    </Text>
+                </View>
+                {/*<View style={styles.buttonContainer} ref={refOutsideProd}>
                     <Pressable style={Style.mobileButtonPrimary} onPress={openDropdown('produtos')}>
                         <Text style={Style.mobileTextButtonPrimary}>Produtos</Text>
                     </Pressable>
@@ -89,7 +94,8 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
                     <Pressable style={Style.mobileButtonPrimary} onPress={updateComponent("Representação 3D")}>
                         <Text style={Style.mobileTextButtonPrimary}>Pesquisa</Text>
                     </Pressable>
-                </View>
+                </View>*/}
+                
             </SafeAreaView>
             
         </>
@@ -106,8 +112,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 10,
         zIndex: 10,
-        height: 100,
-        paddingTop: 10
+        flex: 1.4
     },
     currentBodyTitle: {
         fontSize: 40,
@@ -140,5 +145,10 @@ const styles = StyleSheet.create({
     },
     hideDropdown: {
         display: 'none'
-    }
+    },
+    titleContainer: {
+        backgroundColor: Colours.stocklyBlue,
+        marginBottom: -20
+    },
+
 });

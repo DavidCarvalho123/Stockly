@@ -48,7 +48,7 @@ const Sidebar: React.FC<Props> = ({ parentStyle, updateComponent }) => {
                         Localizações
                     </Text>
 
-                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Manutenção Localizções")}>
+                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Manutenção Localizações")}>
                         <Text style={Style.textButtonPrimary}>Manutenção</Text>
                     </Pressable>
                     <Pressable style={Style.buttonPrimary} onPress={updateComponent("Representação 3D")}>

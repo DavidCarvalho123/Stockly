@@ -10,6 +10,8 @@ type AuthState = {
   isReady: boolean;
   logIn: (token:string) => void;
   logOut: () => void;
+  is3D: boolean;
+  set3D: (val: boolean) => void;
 };
 
 const authStorageKey = "jwtToken";
@@ -19,10 +21,13 @@ export const AuthContext = createContext<AuthState>({
   isReady: false,
   logIn: () => {},
   logOut: () => {},
+  is3D: false,
+  set3D: () => {}
 });
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isReady, setIsReady] = useState(false);
+  const [is3D, set3D] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
@@ -84,6 +89,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         isLoggedIn,
         logIn,
         logOut,
+        is3D,
+        set3D
       }}
     >
       {children}

@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react"; //funciona
-import { Checkbox } from "react-native-paper";
+import { Colours } from "@/libs/Constants";
+import { EditarProduto, GetAllDepartments, GetAllSuppliers, GetProdutoById, SetStockMinimo } from "@/libs/Requests";
 import Style from "@/libs/Style";
-import { Controller, useForm } from "react-hook-form";
 import { ProdutoForm } from "@/models/Produtos";
-import { GetProdutoById, EditarProduto, GetAllSuppliers, GetAllDepartments, SetStockMinimo } from "@/libs/Requests";
+import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState } from "react"; //funciona
+import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -15,8 +16,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Colours } from "@/libs/Constants";
+import { Checkbox } from "react-native-paper";
 
 type Props = {
   produtoId: number;

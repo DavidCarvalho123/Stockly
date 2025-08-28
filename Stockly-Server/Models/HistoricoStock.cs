@@ -15,8 +15,6 @@ public partial class HistoricoStock
 
     public string? Justificativa { get; set; }
 
-    public int? IdPedidosProdutos { get; set; }
-
     public DateTime? Data { get; set; }
 
     public virtual StocksPorEstado? IdStockEstadoNavigation { get; set; }

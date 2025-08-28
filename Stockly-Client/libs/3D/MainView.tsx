@@ -40,6 +40,7 @@ interface renderedObjects {
    refState: React.RefObject<any>,
   obj: FurnitureTypes,
   originalPos?: THREE.Vector3,
+  originalRot?: number,
   furnitureId?: number
 }
 const ConvertDbObjects = (dbData: TreeLocals[]) => {
@@ -47,8 +48,9 @@ const ConvertDbObjects = (dbData: TreeLocals[]) => {
   dbData.forEach((data) => {
     newObjs.push({
       obj: {name: data.nome, sizeX: data.sizeX, sizeY: data.sizeY, sizeZ: data.sizeZ} as FurnitureTypes,
-      refState: { current: { position: new THREE.Vector3(data.coordX, data.coordY, data.coordZ) } } as React.RefObject<any>,
+      refState: { current: { position: new THREE.Vector3(data.coordX, data.coordY, data.coordZ), rotation: [0,data.rotation,0] } } as React.RefObject<any>,
       originalPos: new THREE.Vector3(data.coordX, data.coordY, data.coordZ),
+      originalRot: data.rotation,
       furnitureId: data.id
     });
   });
@@ -147,7 +149,7 @@ const MainView =
 
                   <MainPlane nodeProps={treeData} ref={floorRef}/>
                   {dbSavedObjs.map((ref, i) => (
-                    <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} pos={ref.refState.current.position} />
+                    <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
                     
                     ))}
                   
