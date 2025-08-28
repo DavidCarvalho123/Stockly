@@ -66,8 +66,13 @@ const Navbar: React.FC<Props> = ({updateComponent}) => {
                     <Pressable style={Style.mobileButtonPrimary} onPress={openDropdown('pedidos')}>
                         <Text style={Style.mobileTextButtonPrimary}>Pedidos</Text>
                     </Pressable>
+
+               
                     <View style={PedidosDropdown ? styles.dropdown : styles.hideDropdown}>
-                        <Text style={styles.optionsDropdown}>Criar Pedido</Text>
+                        <Pressable onPress={updateComponent("Criar Pedidos")}>
+                             <Text style={styles.optionsDropdown}>Criar Pedido</Text>
+                        </Pressable>
+                       
                         <View
                             style={{
                                 borderBottomColor: 'black',

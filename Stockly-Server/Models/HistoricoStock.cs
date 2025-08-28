@@ -6,7 +6,7 @@ namespace Stockly_Server.Models;
 public partial class HistoricoStock
 {
     public int Id { get; set; }
-
+    
     public int? IdStockEstado { get; set; }
 
     public int? StockInicial { get; set; }

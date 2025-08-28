@@ -36,11 +36,11 @@ const Sidebar: React.FC<Props> = ({ parentStyle, updateComponent }) => {
                         Pedidos
                     </Text>
 
+                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Criar Pedidos")}>
+                        <Text style={Style.textButtonPrimary}>Criar Pedidos</Text>
+                    </Pressable>
                     <Pressable style={Style.buttonPrimary} onPress={updateComponent("Tratar Pedidos")}>
                         <Text style={Style.textButtonPrimary}>Tratar Pedidos</Text>
-                    </Pressable>
-                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Transferências")}>
-                        <Text style={Style.textButtonPrimary}>Transferências</Text>
                     </Pressable>
 
 

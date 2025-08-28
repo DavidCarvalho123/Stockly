@@ -10,10 +10,9 @@ public partial class Utilizadore : IdentityUser<int>
     public string? Nome { get; set; }
 
     public string? NomeUtilizador { get; set; }
-
+    
     public string? Password { get; set; }
-
-
+    
     public string? Cargo { get; set; }
 
     public int? IdLocalizacao { get; set; }

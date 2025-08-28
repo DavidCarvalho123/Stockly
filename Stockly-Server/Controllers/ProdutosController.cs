@@ -41,6 +41,20 @@ namespace Stockly_Server.Controllers
             }
             return Ok(results);
         }
+        
+        [HttpGet]
+        [Route("GetByEAN/{ean}")]
+        public IActionResult GetByEAN(string ean)
+        {
+            using var ctx = new StocklyContext();
+            var p = ctx.Produtos
+                .Where(x => x.Ean == ean)
+                .Select(x => new { id = x.Id, nome = x.Nome, ean = x.Ean })
+                .FirstOrDefault();
+
+            if (p == null) return NotFound();
+            return Ok(p);
+        }
 
         [HttpGet]
         [HttpGet("GetProdutoById/{id}")]
