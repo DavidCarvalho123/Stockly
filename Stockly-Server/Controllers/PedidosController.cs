@@ -27,52 +27,50 @@ namespace Stockly_Server.Controllers
         // - Pedido: IdLocalizacao (origem opcional), IdLocalizacaoDestino (destino), IdUtilizador (opcional)
         // - LinhasPedidos: IdProduto, QuantidadePedida, EstadoInicial, EstadoFinal
         [HttpPost("Create")]
-        public IActionResult Create([FromBody] Pedido pedido)
+        public IActionResult Create([FromBody] PedidoForm pedido)
         {
-            if (pedido == null || pedido.LinhasPedidos == null || pedido.LinhasPedidos.Count == 0)
+            if (pedido == null || pedido.Linhas == null || pedido.Linhas.Count == 0)
                 return BadRequest(new { message = "Pedido sem linhas." });
 
             using var context = new StocklyContext();
-            using var tx = context.Database.BeginTransaction();
 
             try
             {
-                // Id do utilizador: se não vier no payload, usa o primeiro só para ter FK válida
-                if (pedido.IdUtilizador == null)
+                Pedido ped = new Pedido()
                 {
-                    var anyUser = context.Utilizadores.Select(u => (int?)u.Id).FirstOrDefault();
-                    if (anyUser == null)
-                        return StatusCode(500, new { message = "Não existem utilizadores na base de dados." });
-                    pedido.IdUtilizador = anyUser.Value;
-                }
-
-                // Valida destino
-                if (pedido.IdLocalizacaoDestino == null ||
-                    !context.Localizacoes.Any(l => l.Id == pedido.IdLocalizacaoDestino))
-                {
-                    return BadRequest(new { message = "Localização de destino inválida." });
-                }
-
+                    IdUtilizador = 5,
+                    Observacoes = "Transferencia",
+                    IdLocalizacao = pedido.OrigemId,
+                    IdLocalizacaoDestino = pedido.DestinoId,
+                    Enviado = true,
+                    Concluido = false,
+                };
+                context.Pedidos.Add(ped);
+                context.SaveChanges();
+                
+                
+                
                 // Previne que o cliente force DataPedido/Processado
-                foreach (var lp in pedido.LinhasPedidos)
+                foreach (var lp in pedido.Linhas)
                 {
                     // valida produto
-                    if (!context.Produtos.Any(p => p.Id == lp.IdProduto))
-                        return BadRequest(new { message = $"Produto {lp.IdProduto} não existe." });
-
-                    // valida estados
-                    if (!context.Estados.Any(e => e.Id == lp.EstadoInicial))
-                        return BadRequest(new { message = $"Estado inicial {lp.EstadoInicial} inválido." });
-                    if (!context.Estados.Any(e => e.Id == lp.EstadoFinal))
-                        return BadRequest(new { message = $"Estado final {lp.EstadoFinal} inválido." });
+                    if (!context.Produtos.Any(p => p.Id == lp.ProdutoId))
+                        return BadRequest(new { message = $"Produto {lp.ProdutoId} não existe." });
 
                     // força defaults ao criar
-                    lp.Processado = false;
-                    lp.DataPedido = null;
+                    context.LinhasPedidos.Add(new LinhasPedido()
+                    {
+                        IdPedido = ped.Id,
+                        IdProduto = lp.ProdutoId,
+                        QuantidadePedida = lp.Quantidade,
+                        Processado = false,
+                        EstadoInicial = pedido.EstadoInicialId,
+                        EstadoFinal = pedido.EstadoFinalId,
+                        DataPedido = DateTime.Now,
+                        
+                    });
                 }
 
-                // 1) Cabeçalho
-                context.Pedidos.Add(pedido);
                 try
                 {
                     context.SaveChanges(); // gera Id do pedido
@@ -86,41 +84,15 @@ namespace Stockly_Server.Controllers
                         detail = ex.InnerException?.Message
                     });
                 }
+                
 
-                // 2) Movimentação de stock (por cada linha)
-                int destinoId = pedido.IdLocalizacaoDestino!.Value;
+                
 
-                foreach (var lp in pedido.LinhasPedidos)
-                {
-                    // Ajusta stock no destino entre estados (permite negativo)
-                    var speInicial = GetOrCreateSpe(context, lp.IdProduto!.Value, destinoId, lp.EstadoInicial);
-                    speInicial.Quantidade = (speInicial.Quantidade ?? 0) - (lp.QuantidadePedida ?? 0);
-
-                    var speFinal = GetOrCreateSpe(context, lp.IdProduto!.Value, destinoId, lp.EstadoFinal);
-                    speFinal.Quantidade = (speFinal.Quantidade ?? 0) + (lp.QuantidadePedida ?? 0);
-                }
-
-                try
-                {
-                    context.SaveChanges();
-                    tx.Commit();
-                }
-                catch (Exception ex)
-                {
-                    tx.Rollback();
-                    return StatusCode(500, new
-                    {
-                        message = "Erro ao gravar linhas/movimentos.",
-                        error = ex.Message,
-                        detail = ex.InnerException?.Message
-                    });
-                }
-
-                return Ok(new { message = "Pedido criado com sucesso.", pedidoId = pedido.Id, numero = pedido.Id });
+                return Ok(new { message = "Pedido criado com sucesso.", pedidoId = ped.Id, numero = ped.Id });
             }
             catch (Exception e)
             {
-                tx.Rollback();
+               
                 return StatusCode(500, new
                 {
                     message = "Erro inesperado ao criar pedido.",
@@ -152,5 +124,21 @@ namespace Stockly_Server.Controllers
 
             return spe;
         }
+    }
+    public class Linha
+    {
+        public int ProdutoId { get; set; }
+        public int Quantidade { get; set; }
+        public string? Ean { get; set; } // optional
+    }
+
+    public class PedidoForm
+    {
+        public int DestinoId { get; set; }
+        public int EstadoInicialId { get; set; }
+        public int EstadoFinalId { get; set; }
+        public int OrigemId { get; set; }
+        
+        public List<Linha> Linhas { get; set; } = new List<Linha>();
     }
 }

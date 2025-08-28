@@ -6,6 +6,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useContext } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface Props {
     updateComponent: (component: string) => () => void
@@ -16,7 +17,7 @@ const BottomTabs: React.FC<Props> = ({updateComponent}) => {
 
     return(
         <>
-            <View style={{flex: 1, backgroundColor: context.is3D ? '#000000' : ''}}>
+            <SafeAreaView style={{flex: 1, backgroundColor: '#ffffff'}}>
                 <View style={styles.container}>
                     <View style={styles.buttons}>
                         <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Manutenção Produtos")}>
@@ -38,7 +39,7 @@ const BottomTabs: React.FC<Props> = ({updateComponent}) => {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </SafeAreaView>
         </>
     );
 }
@@ -52,8 +53,8 @@ container: {
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 10,
-        zIndex: 0,
-        marginTop: 'auto',
+        zIndex: 99,
+        height: 50,
         flex: 1,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40
@@ -63,7 +64,6 @@ container: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         flex: 1,
-        marginBottom: 10
     },
     text:{
         color:'#ffffff',

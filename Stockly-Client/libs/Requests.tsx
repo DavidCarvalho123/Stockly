@@ -3,7 +3,7 @@ import { LoginForm, Token } from "@/models/Login";
 import { InventoryForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://192.168.124.97:8082/api/';
+const baseUrl = 'http://192.168.114.97:8082/api/';
 
 export const Login = async (loginForm:LoginForm) => {
   var results: Response = new Response();
@@ -426,6 +426,7 @@ export const GetNextPedidoNumero = async () => {
 };
 
 type CreatePedidoPayload = {
+  origemId: number;
   destinoId: number;
   estadoInicialId: number;
   estadoFinalId: number;
