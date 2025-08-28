@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 10,
         zIndex: 10,
-        flex: 1.4
+        flex: 0.9
     },
     currentBodyTitle: {
         fontSize: 40,

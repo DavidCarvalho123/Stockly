@@ -64,6 +64,6 @@ const styles = StyleSheet.create({
         flex: 5
     },
     activeMain: {
-        flex: 7
+        flex: 3.5
     }
 });

@@ -78,7 +78,7 @@ const ManutencaoLocalizacoes:React.FC = () => {
 
     useEffect(() => {
         fetchData();
-    }, [currentMode])
+    }, [])
 
     useEffect(() => {
         if(selectedLocal !== undefined){

@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj": {}
+    "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj": {
+    "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj",
+        "projectUniqueName": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj",
         "projectName": "Stockly-Server",
-        "projectPath": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj",
-        "packagesPath": "C:\\Users\\David\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\obj\\",
+        "projectPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj",
+        "packagesPath": "/var/root/.nuget/packages/",
+        "outputPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\David\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/var/root/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -44,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net8.0": {
@@ -106,6 +100,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.14, 8.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.osx-arm64",
+              "version": "[8.0.14, 8.0.14]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.14, 8.0.14]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -114,7 +122,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.202/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -39,7 +39,5 @@ public partial class Produto
 
     public virtual ICollection<LinhasPedido> LinhasPedidos { get; set; } = new List<LinhasPedido>();
 
-    public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
-
     public virtual ICollection<StocksPorEstado> StocksPorEstados { get; set; } = new List<StocksPorEstado>();
 }

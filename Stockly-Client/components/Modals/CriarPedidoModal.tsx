@@ -124,8 +124,11 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
   const [pedidoNumero, setPedidoNumero] = useState<number>(1);
 
   const [destinoId, setDestinoId] = useState<number | undefined>();
+  const [origemId, setOrigemId] = useState<number | undefined>();
   const [estadoInicialId, setEstadoInicialId] = useState<number | undefined>();
   const [estadoFinalId, setEstadoFinalId] = useState<number | undefined>();
+
+
 
   const [linhas, setLinhas] = useState<Linha[]>([EMPTY_LINE(1)]);
   const [submitting, setSubmitting] = useState(false);
@@ -157,6 +160,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
 
         setPedidoNumero(nextNr ?? 1);
         // limpa seleções/linhas ao abrir
+        setOrigemId(undefined);
         setDestinoId(undefined);
         setEstadoInicialId(undefined);
         setEstadoFinalId(undefined);
@@ -225,7 +229,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
   }, []);
 
   const onSubmit = useCallback(async () => {
-    if (!destinoId || !estadoInicialId || !estadoFinalId) {
+    if (!destinoId || !estadoInicialId || !estadoFinalId || !origemId) {
       Alert.alert("Campos obrigatórios", "Seleciona destino, estado inicial e estado final.");
       return;
     }
@@ -306,6 +310,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
     try {
       setSubmitting(true);
       const resp = await CreatePedido({
+        origemId,
         destinoId,
         estadoInicialId,
         estadoFinalId,
@@ -335,7 +340,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
           <Text style={styles.subtitle}>Pedido Nr: {pedidoNumero}</Text>
 
           <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-            <Text style={styles.label}>Destino</Text>
+            {/* <Text style={styles.label}>Destino</Text>
             <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
               <Picker selectedValue={destinoId} onValueChange={(v) => setDestinoId(v)} style={styles.pickerInner}>
                 <Picker.Item label="-- Seleciona --" value={undefined} />
@@ -343,7 +348,35 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
                   <Picker.Item key={l.id} label={l.nome} value={l.id} />
                 ))}
               </Picker>
+            </View> */}
+
+
+            <View style={[styles.row2, { gap: 16 }]}>
+                  <View style={{ flex: 1 }}>
+                <Text style={styles.label}>Origem</Text>
+                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                  <Picker selectedValue={origemId} onValueChange={(v) => setOrigemId(v)} style={styles.pickerInner}>
+                    <Picker.Item label="-- Seleciona --" value={undefined} />
+                    {locais.map((l) => (
+                      <Picker.Item key={l.id} label={l.nome} value={l.id} />
+                    ))}
+                  </Picker>
+                </View>
+               </View>
+                 <View style={{ flex: 1 }}>
+                <Text style={styles.label}>Destino</Text>
+                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                  <Picker selectedValue={destinoId} onValueChange={(v) => setDestinoId(v)} style={styles.pickerInner}>
+                    <Picker.Item label="-- Seleciona --" value={undefined} />
+                    {locais.map((l) => (
+                      <Picker.Item key={l.id} label={l.nome} value={l.id} />
+                    ))}
+                  </Picker>
+                </View>
+              </View>
             </View>
+
+
 
             <View style={[styles.row2, { gap: 16 }]}>
               <View style={{ flex: 1 }}>

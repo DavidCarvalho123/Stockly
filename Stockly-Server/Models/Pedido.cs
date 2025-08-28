@@ -11,8 +11,6 @@ public partial class Pedido
 
     public string? Observacoes { get; set; }
 
-    public int? IdProdutoPedido { get; set; }
-
     public int? IdLocalizacao { get; set; }
 
     public int? IdLocalizacaoDestino { get; set; }
@@ -25,9 +23,7 @@ public partial class Pedido
 
     public virtual Localizaco? IdLocalizacaoNavigation { get; set; }
 
-    public virtual Produto? IdProdutoPedidoNavigation { get; set; }
-
     public virtual Utilizadore? IdUtilizadorNavigation { get; set; }
 
-    public virtual ICollection<LinhasPedido> LinhasPedidos { get; set; } = new List<LinhasPedido>();
+    public virtual ICollection<LinhasPedido> LinhasPedidos { get; set; }
 }

@@ -215,7 +215,7 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
 
             entity.HasIndex(e => e.IdLocalizacaoDestino, "IdLocalizacaoDestino");
 
-            entity.HasIndex(e => e.IdProdutoPedido, "IdProdutoPedido");
+       
 
             entity.HasIndex(e => e.IdUtilizador, "IdUtilizador");
 
@@ -226,9 +226,6 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)");
             entity.Property(e => e.IdLocalizacaoDestino)
-                .HasDefaultValueSql("'NULL'")
-                .HasColumnType("int(11)");
-            entity.Property(e => e.IdProdutoPedido)
                 .HasDefaultValueSql("'NULL'")
                 .HasColumnType("int(11)");
             entity.Property(e => e.IdUtilizador)
@@ -247,11 +244,6 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
                 .HasForeignKey(d => d.IdLocalizacaoDestino)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("pedidos_ibfk_4");
-
-            entity.HasOne(d => d.IdProdutoPedidoNavigation).WithMany(p => p.Pedidos)
-                .HasForeignKey(d => d.IdProdutoPedido)
-                .OnDelete(DeleteBehavior.Restrict)
-                .HasConstraintName("pedidos_ibfk_2");
 
             entity.HasOne(d => d.IdUtilizadorNavigation).WithMany(p => p.Pedidos)
                 .HasForeignKey(d => d.IdUtilizador)
