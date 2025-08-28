@@ -1,5 +1,6 @@
 import { renderedObjectsToSave } from "@/models/Localizacoes"; //funciona
 import { LoginForm, Token } from "@/models/Login";
+import { InventoryForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const baseUrl = 'http://192.168.1.81:8082/api/'
@@ -174,12 +175,12 @@ export const GetStoredGraphics = async (localId:number) => {
     return results;
 }
 
-export const UpdatePosObject = async (position:{x:number,y:number,z:number},localId: number) => {
+export const UpdatePosObject = async (newCoords: {coords:{x:number,y:number,z:number}, rotation: number},localId: number) => {
     var results: Response = new Response();
     const auth = await AsyncStorage.getItem('jwtToken');
     if(auth !== null){
         const tokenObj = JSON.parse(auth) as Token;
-        await fetch(baseUrl + 'Localizacoes/UpdatePosObject?localId='+localId, {method:'PATCH',headers:{'Authorization':'Bearer ' + tokenObj.token,'Content-Type':'Application/json'},body: JSON.stringify(position)})
+        await fetch(baseUrl + 'Localizacoes/UpdatePosObject?localId='+localId, {method:'PATCH',headers:{'Authorization':'Bearer ' + tokenObj.token,'Content-Type':'Application/json'},body: JSON.stringify(newCoords)})
                 .then((resp) => resp.json())
                 .then((json) => results = json)
                 .catch((error) => console.error(error));
@@ -235,6 +236,51 @@ export const GetLocalizacaoById = async (id: number) => {
   } else throw new Error('Erro no token');
   } catch (error) {
     console.error("Erro no GetLocalizacaoById:", error);
+    throw error;
+  }
+};
+
+export const EditarLocalizacao = async (id: number, local: any) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) throw new Error("Token não encontrado. Faça login novamente.");
+  const tokenObj = JSON.parse(auth) as { token: string };
+
+  const resp = await fetch(baseUrl + `Localizacoes/EditarLocalizacao/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + tokenObj.token,
+    },
+    body: JSON.stringify(local),
+  });
+
+  if (!resp.ok) throw new Error(await resp.text());
+  return await resp.json();
+};
+
+export const CriarLocalizacao = async (local: any) => {
+  try {
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if (!auth) throw new Error('Token não encontrado. Faça login novamente.');
+    const tokenObj = JSON.parse(auth) as { token: string };
+
+    const resp = await fetch(baseUrl + 'Localizacoes/CriarLocalizacao', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + tokenObj.token
+      },
+      body: JSON.stringify(local)
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      throw new Error(errText || 'Erro ao criar localização');
+    }
+
+    return await resp.json();
+  } catch (error) {
+    console.error('Erro no CriarLocalizacao:', error);
     throw error;
   }
 };
@@ -300,6 +346,24 @@ export const GetStocksInventory = async (localizacaoId: number) => {
   return results;
 };
 
+export const UpdateInventory = async (localizacaoId: number, stocks: InventoryForm[]) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) throw new Error("Token não encontrado. Faça login novamente.");
+  const tokenObj = JSON.parse(auth) as { token: string };
+
+  const resp = await fetch(baseUrl + `Stocks/UpdateInventory/${localizacaoId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + tokenObj.token,
+    },
+    body: JSON.stringify(stocks),
+  });
+
+  if (!resp.ok) throw new Error(await resp.text());
+  return await resp.json();
+}
+
 // ---------------------------------
 
 
@@ -320,7 +384,6 @@ export const GetAllStates = async (): Promise<any[]> => {
         json.forEach((e: any) => {
           results[e.id] = {id: e.id, Estado: e.estado1};   // <- usa o campo Estado1 da BD
         });
-        console.log(results)
       })
       .catch((error) => console.error(error));
   }

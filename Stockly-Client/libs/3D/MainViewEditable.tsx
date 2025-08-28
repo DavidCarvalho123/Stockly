@@ -43,6 +43,7 @@ interface renderedObjects {
   refState: React.RefObject<any>,
   obj: FurnitureTypes,
   originalPos?: THREE.Vector3,
+  originalRot?: number,
   furnitureId?: number
 }
 const ConvertDbObjects = (dbData: TreeLocals[]) => {
@@ -50,8 +51,9 @@ const ConvertDbObjects = (dbData: TreeLocals[]) => {
   dbData.forEach((data) => {
     newObjs.push({
       obj: {name: data.nome, sizeX: data.sizeX, sizeY: data.sizeY, sizeZ: data.sizeZ} as FurnitureTypes,
-      refState: { current: { position: new THREE.Vector3(data.coordX, data.coordY, data.coordZ) } } as React.RefObject<any>,
+      refState: { current: { position: new THREE.Vector3(data.coordX, data.coordY, data.coordZ), rotation: [0,data.rotation,0] } } as React.RefObject<any>,
       originalPos: new THREE.Vector3(data.coordX, data.coordY, data.coordZ),
+      originalRot: data.rotation,
       furnitureId: data.id
     });
   });
@@ -78,12 +80,17 @@ const MainViewEditable =
   const spotRef4 = useRef<THREE.SpotLight>(null!);
   const pointRef = useRef<THREE.Object3D>(null!);
   useEffect(() => {
+    const preventContextMenu = (e:any) => e.preventDefault();
+    window.addEventListener("contextmenu", preventContextMenu);
     if (spotRef.current && pointRef.current) {
       spotRef.current.target = pointRef.current;
       spotRef2.current.target = pointRef.current;
       spotRef3.current.target = pointRef.current;
       spotRef4.current.target = pointRef.current;
     }
+    return () => {
+      window.removeEventListener("contextmenu", preventContextMenu);
+    };
   }, []);
 
 
@@ -116,7 +123,8 @@ const MainViewEditable =
           graphicalChanges.push({
             obj: notSavObj.obj,
             localPai:treeData?.id,
-            position:{x:notSavObj.refState.current.position.x,y:notSavObj.refState.current.position.y,z:notSavObj.refState.current.position.z}
+            position:{x:notSavObj.refState.current.position.x, y:notSavObj.refState.current.position.y, z:notSavObj.refState.current.position.z},
+            rotation: notSavObj.refState.current.rotation.y
           });
         })
         let result = await PostGraphicalChanges(graphicalChanges);
@@ -128,8 +136,9 @@ const MainViewEditable =
       if(dbSavedObjs.length > 0){
         dbSavedObjs.forEach(async (newObj) => {
           const newVec = newObj.refState.current.position as THREE.Vector3;
-          if(!newObj.originalPos?.equals(newVec)){
-            let result = await UpdatePosObject(newVec,newObj.furnitureId as number);
+          const newRot = newObj.refState.current.rotation.y;
+          if(!newObj.originalPos?.equals(newVec) || newObj.originalRot != newRot){
+            let result = await UpdatePosObject({coords: newVec,rotation: newRot},newObj.furnitureId as number);
             if(result.status >= 200 && result.status < 300){
                 
             }

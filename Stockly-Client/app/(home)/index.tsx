@@ -1,16 +1,19 @@
+import BottomTabs from "@/components/BottomTabs";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
+import { AuthContext } from "@/libs/AuthContext";
 import { AvailableComponents } from "@/libs/AvailableComponents";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { ClickOutsideProvider } from 'react-native-click-outside';
 
 
 const index = () => {
     const [MainComponentTitle, setMainComponentTitle] = useState<string>('');
-
+    const context = useContext(AuthContext);
     const updateCurrentMainComponent = (component: string) => () => {
-        setMainComponentTitle(component)
+        if(component != 'Representação 3D' && MainComponentTitle != 'Representação 3D')context.set3D(false);
+        setMainComponentTitle(component);
     }
 
     if(Platform.OS == 'web'){
@@ -30,8 +33,13 @@ const index = () => {
     else{
         return (
             <ClickOutsideProvider>
-                <Navbar componentTitle="" updateComponent={updateCurrentMainComponent} />
-                    {AvailableComponents[MainComponentTitle]}
+                <View style={styles.mobileContainer}>
+                    <Navbar componentTitle={MainComponentTitle} updateComponent={updateCurrentMainComponent} />
+                    <View style={styles.activeMain}>
+                        {AvailableComponents[MainComponentTitle]}
+                    </View>
+                    <BottomTabs updateComponent={updateCurrentMainComponent} />
+                </View>
             </ClickOutsideProvider>
         )
     }
@@ -44,10 +52,18 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
     },
+    mobileContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+    },
     sidebar: {
         flex: 1
     },
     mainWindow: {
         flex: 5
+    },
+    activeMain: {
+        flex: 7
     }
 });

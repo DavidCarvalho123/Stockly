@@ -78,18 +78,6 @@ namespace Stockly_Server.Controllers
         [Route("CriarProduto")]
         public IActionResult CriarProduto([FromBody] ProdutoFormModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Nome) ||
-                string.IsNullOrWhiteSpace(model.CodigoEAN) ||
-                string.IsNullOrWhiteSpace(model.Departamento) ||
-                string.IsNullOrWhiteSpace(model.Fornecedor) ||
-                string.IsNullOrWhiteSpace(model.Unidade) ||
-                string.IsNullOrWhiteSpace(model.PrecoCompra) ||
-                string.IsNullOrWhiteSpace(model.PrecoVenda) ||
-                string.IsNullOrWhiteSpace(model.Iva))
-            {
-                return BadRequest(new { message = "Campos obrigatórios em falta." });
-            }
-
             try
             {
                 using (var context = new StocklyContext())

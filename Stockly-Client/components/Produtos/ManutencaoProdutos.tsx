@@ -9,7 +9,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView } from "react-native-safe-area-context";
+
+
 // ---- Definição única das colunas ----
 const COLS: { key: keyof ProdutosManutencao | "acao"; label: string; flex: number; filterable?: boolean }[] = [
   { key: "ean",          label: "EAN",          flex: 1.6, filterable: true },
@@ -41,7 +44,7 @@ const FilterBox: React.FC<{
   const [focused, setFocused] = useState(false);
   return (
     <TextInput
-      style={[styles.filterInput, focused && styles.filterInputFocused]}
+      style={[styles.filterInput, focused && styles.filterInputFocused, Platform.OS !== 'web' ? {width: '60%', display: 'flex', flexDirection: 'row', marginBottom: 20, height: 40} : '']}
       placeholder={placeholder}
       placeholderTextColor="#777"
       value={value}
@@ -63,9 +66,11 @@ const ManutencaoProdutos: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
-  // novo: ver stock
   const [viewStockId, setViewStockId] = useState<number | null>(null);
   const [viewStockVisible, setViewStockVisible] = useState(false);
+
+  const [focused, setFocused] = useState<string | null>();
+  const [filterSelection, setFilterSelection] = useState<'Ean' | 'Nome'>('Ean');
 
   const load = async () => {
     const data = await GetAllProducts();
@@ -248,50 +253,131 @@ if (Platform.OS === 'web')
       </SafeAreaView>
     </>
         );
-else
-    return (
-        <SafeAreaView>
-            {products &&
-                <FlatList data={products}
-                    renderItem={({ item }) => <Item key={item.id} item={item} />} />
-            }
-        </SafeAreaView>
-    );
+else{
+  interface ItemProps{
+    item: ProdutosManutencao
+  }
+  const Item = ({item}:ItemProps) => {
+      return(
+        <>
+          <View style={[styles.itemContainer]}>
+                  <View style={[styles.itemLeft]}>
+                      <Text><Text style={styles.headerItem}>EAN:</Text> {item.ean}</Text>
+                      <Text><Text style={styles.headerItem}>Nome:</Text> {item.nome}</Text>
+                      <Text ><Text style={styles.headerItem}>Departamento:</Text> {item.departamento}</Text>
+                      <Text><Text style={styles.headerItem}>Fornecedor:</Text> {item.departamento}</Text>
+                  </View>
+                  <View style={styles.itemRight}>
+                      <Text><Text style={styles.headerItem}>Unidade:</Text> {item.tipoUnidade}</Text>
+                      <Text><Text style={styles.headerItem}>Preço Venda:</Text> {item.precoVenda} €</Text>
+                      <View style={styles.checkboxItem}>
+                          <Text style={[styles.headerItem, {marginTop: 1}]}>Ativo:</Text>
+                          {item.ativo ? <AntDesign name="check" size={20} color="green" /> : <AntDesign name="close" size={20} color="#ec1f1fff" />}
+                      </View>
+                      <MaterialIcons style={{marginTop:'auto'}} name="inventory" size={24} color="black" onPress={() => {
+                          setViewStockId(item.id);
+                          setViewStockVisible(true);
+                        }}/>
+                  </View>
+          </View>
+          <View>
+            {viewStockId !== null && (
+              <VerStockModal
+                produtoId={viewStockId}
+                visible={viewStockVisible}
+                onClose={() => {
+                  setViewStockVisible(false);
+                  setViewStockId(null);
+                }}
+              />
+            )}
+          </View>
+        </>
+      );
+  }
+
+  return (
+      <View style={{marginTop: 20}}>
+        <View style={{flexDirection: 'row', justifyContent:'center', alignContent: 'center'}}>
+            <Dropdown
+              style={[dropdownStyles.dropdown,{width: '30%',height: 40}, focused === 'selectionBox' && { borderColor: 'blue' }]}
+            
+              selectedTextStyle={dropdownStyles.selectedTextStyle}
+              inputSearchStyle={dropdownStyles.inputSearchStyle}
+              iconStyle={dropdownStyles.iconStyle}
+              data={[{id: 1, nome: 'Ean'},{id: 2, nome: 'Nome'}] as any}
+              value={filterSelection == 'Ean' ? 1 : 2 }
+              labelField="nome"
+              valueField="id"
+              onFocus={() => setFocused("selectionBox")}
+              onBlur={() => setFocused(null)}
+              onChange={item => {
+                setFilterSelection(item.nome);
+                setFilters({})
+              }}
+            />
+          <FilterBox
+              value={filters[filterSelection.charAt(0).toLowerCase() + filterSelection.slice(1)] || ""}
+              onChange={(t) => setFilters({ ...filters, [filterSelection.charAt(0).toLowerCase() + filterSelection.slice(1)]: t })}
+            />
+        </View>
+          {filtered &&
+              <FlatList data={filtered} style={{marginBottom: 40}}
+                  renderItem={({ item }) => <Item key={item.id} item={item} />} />
+          }
+      </View>
+  );
+}
 };
 
 export default ManutencaoProdutos;
 
-interface ItemProps{
-    item: ProdutosManutencao
-}
-const Item = ({item}:ItemProps) => {
-    return(
-        <View style={[styles.itemContainer]}>
-                <View style={[styles.itemLeft]}>
-                    <Text><Text style={styles.headerItem}>EAN:</Text> {item.ean}</Text>
-                    <Text><Text style={styles.headerItem}>Nome:</Text> {item.nome}</Text>
-                    <Text ><Text style={styles.headerItem}>Departamento:</Text> {item.departamento}</Text>
-                    <Text><Text style={styles.headerItem}>Fornecedor:</Text> {item.departamento}</Text>
-                </View>
-                <View style={styles.itemRight}>
-                    <Text><Text style={styles.headerItem}>Unidade:</Text> {item.tipoUnidade}</Text>
-                    <Text><Text style={styles.headerItem}>Preço Venda:</Text> {item.precoVenda} €</Text>
-                    <View style={styles.checkboxItem}>
-                        <Text style={[styles.headerItem, {marginTop: 1}]}>Ativo:</Text>
-                        {item.ativo ? <AntDesign name="check" size={20} color="green" /> : <AntDesign name="close" size={20} color="#ec1f1fff" />}
-                    </View>
-                    <MaterialIcons style={{marginTop:'auto'}} name="inventory" size={24} color="black" />
-                </View>
-        </View>
-    );
-}
+
 
 const ROW_BORDER = "#e6e6e6";
 const HEADER_BG = "#f5f5f5";
 
 const ROW_H = 56;
 const FILTER_H = 40;
-
+const dropdownStyles = StyleSheet.create({
+  container: {
+      padding: 16,
+    },
+    dropdown: {
+      backgroundColor: 'white',
+      height: 50,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    icon: {
+      marginRight: 5,
+    },
+    label: {
+      position: 'absolute',
+      backgroundColor: '#fafafa',
+      left: 22,
+      top: 8,
+      zIndex: 999,
+      paddingHorizontal: 8,
+      fontSize: 14,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+    },
+});
 const styles = StyleSheet.create({
   container: {
       flex: 1,

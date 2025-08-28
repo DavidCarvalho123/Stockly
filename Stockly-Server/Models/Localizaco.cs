@@ -27,6 +27,7 @@ public partial class Localizaco
     public float? CoordY { get; set; }
 
     public float? CoordZ { get; set; }
+    public float? Rotation { get; set; }
 
     [NotMapped]
     public List<Localizaco> SubLocalizacao { get; set; }

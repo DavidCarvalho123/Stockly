@@ -1,10 +1,11 @@
 import MainViewEditable from "@/libs/3D/MainViewEditable";
 import { GetTreeLocals } from "@/libs/Requests";
 import { TreeData, TreeLocals } from "@/models/Localizacoes";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import MainView from "@/libs/3D/MainView";
+import { AuthContext } from "@/libs/AuthContext";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import TreeMenu, { Item } from 'react-simple-tree-menu';
 import '../../node_modules/react-simple-tree-menu/dist/main.css';
@@ -37,7 +38,7 @@ const TreeNodeItem: React.FC<{
     <View>
       <View style={[styles.node, { paddingLeft: level * 40, flexDirection: 'row', alignItems: 'center', paddingBottom: 7, paddingTop:7 }]}>
         
-        {node.nodes && (
+        {node.nodes && node.nodes.length > 0 && (
           <TouchableOpacity onPress={() => setExpanded(prev => !prev)}>
             <AntDesign
               name={expanded ? 'minus' : 'plus'}
@@ -77,6 +78,7 @@ const Representacao3d:React.FC = () => {
     const [locals, setLocals] = useState<TreeData[]>();
     const [selectedLocal, setSelectedLocal] = useState<Item>();
     const [selectedViewLocal, setSelectedViewLocal] = useState<TreeData | undefined>(undefined);
+    const context = useContext(AuthContext);
 
     useEffect(() => {
         async function fetchData() {
@@ -94,9 +96,11 @@ const Representacao3d:React.FC = () => {
     }
     const updateSelectedMobileNode = (selectedNode: TreeData | undefined) => {
         setSelectedViewLocal(selectedNode);
+        context.set3D(true);
     }
     const clearSelectedMobileNode = () => {
         setSelectedViewLocal(undefined);
+        context.set3D(false);
     }
     
     if(Platform.OS === 'web'){

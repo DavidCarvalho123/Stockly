@@ -14,7 +14,7 @@ export const AvailableComponents: Record<string, JSX.Element> = {
     "Inventário": <Inventario/>,
     "Tratar Pedidos": <TratarPedidos/>,
     "Transferências": <Transferencias/>,
-    "Manutenção Localizções": <ManutencaoLocalizacoes/>,
+    "Manutenção Localizações": <ManutencaoLocalizacoes/>,
     "Representação 3D": <Representacao3d/>,
     "Gestão de Utilizadores": <GestaoUtilizadores/>,
     "Historico de Transferencias": <HistoricoTransferencias/>
