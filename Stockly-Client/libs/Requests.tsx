@@ -2,7 +2,7 @@ import { renderedObjectsToSave } from "@/models/Localizacoes"; //funciona
 import { LoginForm, Token } from "@/models/Login";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://localhost:8082/api/';
+const baseUrl = 'http://192.168.124.97:8082/api/';
 
 export const Login = async (loginForm:LoginForm) => {
   var results: Response = new Response();
@@ -325,4 +325,64 @@ export const GetAllStates = async (): Promise<any[]> => {
   return results;
 };
 
-// ------------------------
+// ------------------------ Pedidos
+
+// 1) Obter produto por EAN  -> Produtos/GetByEAN/{ean}
+export const GetProdutoByEAN = async (ean: string) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) return null;
+  const tokenObj = JSON.parse(auth) as Token;
+
+  try {
+    const resp = await fetch(
+      `${baseUrl}Produtos/GetByEAN/${encodeURIComponent(ean)}`,
+      { headers: { Authorization: "Bearer " + tokenObj.token } }
+    );
+    if (!resp.ok) return null;
+    const row = await resp.json();
+    return { id: row.id ?? row.Id, nome: row.nome ?? row.Nome, ean: row.ean ?? row.EAN };
+  } catch {
+    return null;
+  }
+};
+
+
+export const GetNextPedidoNumero = async () => {
+  let numero = 1;
+  const auth = await AsyncStorage.getItem('jwtToken');
+  if (auth) {
+    const { token } = JSON.parse(auth) as Token;
+    const resp = await fetch(baseUrl + 'Pedidos/GetNextNumero', {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    const json = await resp.json();
+    numero = json?.numero ?? 1;
+  }
+  return numero;
+};
+
+type CreatePedidoPayload = {
+  destinoId: number;
+  estadoInicialId: number;
+  estadoFinalId: number;
+  linhas: { produtoId: number; quantidade: number; ean?: string }[];
+};
+
+export const CreatePedido = async (payload: CreatePedidoPayload) => {
+  const auth = await AsyncStorage.getItem('jwtToken');
+  if (!auth) throw new Error('Token não encontrado. Faça login novamente.');
+  const { token } = JSON.parse(auth) as Token;
+
+  const resp = await fetch(baseUrl + 'Pedidos/Create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!resp.ok) throw new Error(await resp.text());
+  return await resp.json(); // { message, pedidoId, numero }
+};
