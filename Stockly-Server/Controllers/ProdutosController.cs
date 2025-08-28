@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Stockly_Server.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace Stockly_Server.Controllers
 {
@@ -24,13 +25,17 @@ namespace Stockly_Server.Controllers
                 var availableDepartments = context.Departamentos
                     .Where(d => prods.Select(p => p.IdDepartamento).Contains(d.Id))
                     .ToDictionary(d => d.Id, d => d.Nome);
+                var availableFornecedores = context.Fornecedores
+                    .Where(d => prods.Select(p => p.IdFornecedor).Contains(d.Id))
+                    .ToDictionary(d => d.Id, d => d.Nome);
+
 
                 if (availableDepartments.Count > 0)
                 {
                     results = prods
-                        .Where(p => availableDepartments.ContainsKey((int)p.IdDepartamento))
+                        .Where(p => availableDepartments.ContainsKey((int)p.IdDepartamento) && availableFornecedores.ContainsKey((int)p.IdFornecedor))
                         .Select(products =>
-                            new ProdutosShow(products, availableDepartments[(int)products.IdDepartamento])
+                            new ProdutosShow(products, availableDepartments[(int)products.IdDepartamento], availableFornecedores[(int)products.IdFornecedor])
                         ).ToList();
                 }
             }
@@ -152,6 +157,7 @@ namespace Stockly_Server.Controllers
         public string Nome { get; set; } = null!;
         public bool? Ativo { get; set; }
         public string? Departamento { get; set; }
+        public string? Fornecedor { get; set; }
         public string? TipoUnidade { get; set; }
         public float? PrecoVenda { get; set; }
         public float? PrecoCompra { get; set; }
@@ -161,13 +167,14 @@ namespace Stockly_Server.Controllers
         public float? Largura { get; set; }
         
 
-        public ProdutosShow(Produto prod, string departmentName)
+        public ProdutosShow(Produto prod, string departmentName, string fornecedoresName)
         {
             Id = prod.Id;
             Ean = prod.Ean;
             Nome = prod.Nome;
             Ativo = prod.Ativo;
             Departamento = departmentName;
+            Fornecedor = fornecedoresName;
             TipoUnidade = prod.TipoUnidade;
             PrecoVenda = prod.PrecoVenda;
             PrecoCompra = prod.PrecoCompra;
