@@ -3,9 +3,7 @@ import { LoginForm, Token } from "@/models/Login";
 import { InventoryForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://192.168.1.81:8082/api/'
-
-// ----------- JWT-based login -----------
+const baseUrl = 'http://localhost:8082/api/';
 
 export const Login = async (loginForm:LoginForm) => {
   var results: Response = new Response();

@@ -17,7 +17,7 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
   rotationY
 }) => {
   const { camera } = useThree();
-  const PAN_SPEED = 1;
+  const PAN_SPEED = 0.05;
 
   useFrame(() => {
     camera.position.x += panX.value * PAN_SPEED;

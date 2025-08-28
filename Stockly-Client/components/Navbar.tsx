@@ -119,7 +119,8 @@ const styles = StyleSheet.create({
         paddingTop:47
     },
     buttonContainer: {
-        width: '30%'
+        width: '30%',
+        height: '100%'
     },
     dropdown: {
         display: 'flex',
