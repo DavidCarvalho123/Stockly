@@ -1,6 +1,7 @@
 import { Colours } from "@/libs/Constants";
-import { GetAllLocals, GetStocksInventory, UpdateInventory } from "@/libs/Requests";
+import { GetAllLocals, GetAllStates, GetStocksInventory, UpdateInventory } from "@/libs/Requests";
 import Style from "@/libs/Style";
+import { Estado } from "@/models/Estados";
 import { InventoryForm, StocksInventario } from "@/models/Stocks";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { Picker } from "@react-native-picker/picker";
@@ -70,8 +71,8 @@ const FilterBox: React.FC<{
     values: InventoryForm[]
   }
   interface MobileForm{
-    ean: string,
     state: number,
+    ean: string,
     quantity: number
   }
 
@@ -89,7 +90,8 @@ const Inventario:React.FC = () => {
     const refOutside = useClickOutside<TextInput>(() => {
       Keyboard.dismiss();
     });
-
+    const [estados, setEstados] = useState<Estado[]>([]);
+    
     const { setValue, control, handleSubmit, reset, formState: { errors } } = useForm<PreForm>();
     const { setValue: setValueMobile, control: controlMobile, handleSubmit: handleSubmitMobile, reset: resetMobile, formState: {errors: errorsMobile}} = useForm<MobileForm>()
     const { fields, insert } = useFieldArray({ control, name: "values"})
@@ -99,6 +101,14 @@ const Inventario:React.FC = () => {
           try {
             const locals = await GetAllLocals();
             setLocalizacoes(locals);
+            const estsRaw = await GetAllStates();
+            const ests: Estado[] = Array.isArray(estsRaw)
+              ? estsRaw.filter(Boolean).map((e: any) => ({
+                  id: e.id ?? e.Id,
+                  nome: e.Estado ?? e.estado1 ?? e.nome ?? e.Nome ?? `Estado ${e.id ?? e.Id}`,
+                }))
+              : [];
+            setEstados(ests);
           } catch (e) {
             console.error("Erro a carregar locais:", e);
           }
@@ -392,6 +402,37 @@ const Inventario:React.FC = () => {
                     }}
                   />
                 </View>
+                <View style={dropdownStyles.container}>
+                  <Label text="Estado" required />
+                  <View style={[
+                    styles.pickerBox,
+                    (errorsMobile.state && styles.pickerError) || null,
+                    focusedField === "estado" && styles.inputFocused
+                  ]}>
+                    <Controller
+                      control={controlMobile}
+                      name="state"
+                      rules={{ required: "Campo obrigatório" }}
+                      render={({ field: { onChange, value } }) => (
+                        <Picker
+                          selectedValue={value}
+                          onValueChange={onChange}
+                          style={styles.pickerInner}
+                          dropdownIconColor="#5F5F5F"
+                          onFocus={() => setFocusedField("estado")}
+                          onBlur={() => setFocusedField(null)}
+                        >
+                          <Picker.Item label="-- Selecione --" value="" />
+                          {estados.map((dep) => (
+                            <Picker.Item key={dep.id} label={dep.nome} value={String(dep.id)} />
+                          ))}
+                        </Picker>
+                      )}
+                    />
+                  </View>
+                </View>
+
+
                 <View style={[dropdownStyles.container,{width: '70%'}]}>
                   <Label text="EAN" />
                   <Controller
@@ -419,6 +460,7 @@ const Inventario:React.FC = () => {
                     )}}
                   />
                 </View>
+                
                 { cameraActive &&
                   <CameraView barcodeScannerSettings={{ barcodeTypes: ['ean13','ean8','code128','code39','code93','codabar']}} onBarcodeScanned={(barcode) => {console.log(barcode);setValueMobile('ean',barcode.data)}} style={{ height: '100%'}} facing={'back'} />
                 }
