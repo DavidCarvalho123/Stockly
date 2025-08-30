@@ -1,16 +1,20 @@
 import { Colours } from "@/libs/Constants";
-import { GetAllLocals, GetAllStates, GetStocksInventory, UpdateInventory } from "@/libs/Requests";
+import { GetAllLocals, GetAllStates, GetStocksInventory, UpdateInventory, UpdateInventoryMobile } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { Estado } from "@/models/Estados";
-import { InventoryForm, StocksInventario } from "@/models/Stocks";
+import { InventoryForm, InventoryMobileForm, InventoryMobileFormError, StocksInventario } from "@/models/Stocks";
+import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Picker } from "@react-native-picker/picker";
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Haptics from 'expo-haptics';
 import { useEffect, useMemo, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { ActivityIndicator, Button, Keyboard, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Button, Keyboard, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useClickOutside } from "react-native-click-outside";
 import { Dropdown } from 'react-native-element-dropdown';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Label: React.FC<{ text: string; required?: boolean }> = ({ text, required }) => (
   <Text style={styles.label}>
@@ -70,11 +74,11 @@ const FilterBox: React.FC<{
   interface PreForm{
     values: InventoryForm[]
   }
-  interface MobileForm{
-    state: number,
-    ean: string,
-    quantity: number
+  interface PreFormMobile{
+    values: InventoryMobileForm[]
   }
+
+  
 
 const Inventario:React.FC = () => {
     const [localizacoes, setLocalizacoes] = useState<{ id: number; nome: string }[]>([]);
@@ -87,14 +91,20 @@ const Inventario:React.FC = () => {
 
     const [permission, requestPermission] = useCameraPermissions();
     const [cameraActive, setCameraActive] = useState<boolean>(false);
-    const refOutside = useClickOutside<TextInput>(() => {
+    const [torch, setTorch] = useState<boolean>(false);
+    const refOutside = useClickOutside<View>(() => {
       Keyboard.dismiss();
     });
     const [estados, setEstados] = useState<Estado[]>([]);
-    
+    const [selectedEstado, setSelectedEstado] = useState<number>();
+    const [lastSelectedEan, setLastSelectedEan] = useState<number>(0);
+    const [localError, setLocalError] = useState<boolean>(false);
+    const [estadoError, setEstadoError] = useState<boolean>(false);
+
     const { setValue, control, handleSubmit, reset, formState: { errors } } = useForm<PreForm>();
-    const { setValue: setValueMobile, control: controlMobile, handleSubmit: handleSubmitMobile, reset: resetMobile, formState: {errors: errorsMobile}} = useForm<MobileForm>()
+    const { setError: setErrorMobile,setValue: setValueMobile, control: controlMobile, handleSubmit: handleSubmitMobile, reset: resetMobile, formState: {errors: errorsMobile}} = useForm<PreFormMobile>({defaultValues: {values: [{ean:'',quantity: 0}]}})
     const { fields, insert } = useFieldArray({ control, name: "values"})
+    const { fields: fieldsMobile, append: appendMobile } = useFieldArray({ control: controlMobile, name: "values"})
 
     useEffect(() => {
         (async () => {
@@ -144,7 +154,7 @@ const Inventario:React.FC = () => {
       }, [selectedLocal])
 
     const onchangeLocals = (itemValue: any, itemIndex: number) => {
-      console.log(itemValue)
+        console.log(itemValue)
         setSelectedLocal(itemValue)
     }
 
@@ -161,6 +171,42 @@ const Inventario:React.FC = () => {
       finally{
         setIsProcessing(false);
       }
+    }
+
+    const onSubmitMobile = async (data: PreFormMobile) => {
+      setIsProcessing(true);
+      try{
+        if(selectedLocal !== undefined && selectedEstado !== undefined){
+          setLocalError(false);
+          setEstadoError(false);
+          const resp = await UpdateInventoryMobile(selectedLocal,selectedEstado,data.values);
+
+          if(resp.status == 404){ // one of the Eans doesn't exist
+            const errors = await resp.json() as InventoryMobileFormError[]
+            errors.map(err => {
+              setErrorMobile(`values.${err.index}.ean`, {message: err.error});
+            });
+          }
+          else if(resp.status >= 200 && resp.status < 300){
+            setSelectedLocal(undefined);
+            setSelectedEstado(undefined);
+            resetMobile();
+          }
+        }
+        else{
+          console.log(selectedLocal)
+          console.log(selectedEstado)
+          setLocalError(selectedLocal === undefined);
+          setEstadoError(selectedEstado === undefined);
+        }
+      }
+      catch(e) {
+        console.error("Erro a atualizar o inventário: ", e)
+      }
+      finally{
+        setIsProcessing(false);
+      }
+      //setErrorMobile('values.1.ean',{message: 'erro'});
     }
 
     const Header = useMemo(
@@ -372,8 +418,16 @@ const Inventario:React.FC = () => {
       );
       }
 
-      const toggleCameraState = () => {
+      const toggleCameraState = (index:number) => {
+        setLastSelectedEan(index);
         setCameraActive(!cameraActive);
+      }
+
+      const readBarcode = (data:string) => {
+        setCameraActive(false);
+        setTorch(false);
+        setValueMobile(`values.${lastSelectedEan}.ean`,data);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
       }
       
       return(
@@ -387,6 +441,7 @@ const Inventario:React.FC = () => {
                   <Dropdown
                     style={[dropdownStyles.dropdown, focusedField === 'localizacoes' && { borderColor: 'blue' }]}
                     placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Selecionar Localização"
                     selectedTextStyle={dropdownStyles.selectedTextStyle}
                     inputSearchStyle={dropdownStyles.inputSearchStyle}
                     iconStyle={dropdownStyles.iconStyle}
@@ -397,73 +452,134 @@ const Inventario:React.FC = () => {
                     onFocus={() => setFocusedField("localizacoes")}
                     onBlur={() => setFocusedField(null)}
                     onChange={item => {
-                      console.log(item)
                       onchangeLocals(item.id,item.nome);
                     }}
                   />
+                  {localError && <Text style={styles.errorText}>É necessário selecionar uma localização</Text>}
                 </View>
-                <View style={dropdownStyles.container}>
-                  <Label text="Estado" required />
-                  <View style={[
-                    styles.pickerBox,
-                    (errorsMobile.state && styles.pickerError) || null,
-                    focusedField === "estado" && styles.inputFocused
-                  ]}>
-                    <Controller
-                      control={controlMobile}
-                      name="state"
-                      rules={{ required: "Campo obrigatório" }}
-                      render={({ field: { onChange, value } }) => (
-                        <Picker
-                          selectedValue={value}
-                          onValueChange={onChange}
-                          style={styles.pickerInner}
-                          dropdownIconColor="#5F5F5F"
-                          onFocus={() => setFocusedField("estado")}
-                          onBlur={() => setFocusedField(null)}
-                        >
-                          <Picker.Item label="-- Selecione --" value="" />
-                          {estados.map((dep) => (
-                            <Picker.Item key={dep.id} label={dep.nome} value={String(dep.id)} />
-                          ))}
-                        </Picker>
-                      )}
-                    />
-                  </View>
-                </View>
-
-
-                <View style={[dropdownStyles.container,{width: '70%'}]}>
-                  <Label text="EAN" />
-                  <Controller
-                    control={controlMobile}
-                    name={'ean'}
-                    render={({ field: { onChange, value, onBlur } }) => {
-                      return(
-                      <View style={{ display:'flex',flexDirection:'row' }}>
-                        <TextInput
-                          ref={refOutside}
-                          style={[
-                            styles.input,
-                          errorsMobile.ean && styles.inputError,
-                            focusedField === 'ean' && styles.inputFocused, {flex: 5}
-                          ]}
-                          onChangeText={onChange}
-                          value={value?? ""}
-                          onBlur={() => { onBlur(); setFocusedField(null); }}
-                          onFocus={() => setFocusedField('ean')}
-                        />
-                        <TouchableOpacity style={styles.buttonView} onPress={toggleCameraState}>
-                              <FontAwesome6 name="barcode" size={24} color="black" />
-                          </TouchableOpacity>
-                      </View>
-                    )}}
+                <View style={[dropdownStyles.container,{paddingBottom: 24}]}>
+                  <Text style={[dropdownStyles.label, focusedField === 'estado' && { color: 'blue' }]}>
+                    Estado
+                  </Text>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'estado' && { borderColor: 'blue' }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Selecionar Estado"
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={estados}
+                    value={selectedEstado}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("estado")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      setSelectedEstado(item.id);
+                    }}
                   />
+                  {estadoError && <Text style={styles.errorText}>É necessário selecionar um Estado</Text>}
                 </View>
+                <ScrollView>
+                      <View ref={refOutside}>
+                        {fieldsMobile.map((field, index) => {
+                          return(
+                            <View key={field.id} style={{flexDirection:'row'}}>
+                              <View style={[dropdownStyles.container,{width: '60%',paddingRight: 0, paddingTop: 0}]}>
+                                <Label text="EAN" />
+                                <Controller
+                                  key={field.id}
+                                  control={controlMobile}
+                                  name={`values.${index}.ean`}
+                                  render={({ field: { onChange, value, onBlur } }) => {
+                                    return(
+                                    <View style={{ display:'flex',flexDirection:'row' }}>
+                                      <TextInput
+                                        style={[
+                                          styles.input,
+                                          errorsMobile.values && errorsMobile.values[index]?.ean && styles.inputError,
+                                          focusedField === `ean.${index}` && styles.inputFocused, {flex: 5}
+                                        ]}
+                                        onChangeText={onChange}
+                                        value={value?? ""}
+                                        onBlur={() => { onBlur(); setFocusedField(null); }}
+                                        onFocus={() => setFocusedField(`ean.${index}`)}
+                                      />
+                                    </View>
+                                  )}}
+                                />
+                                {errorsMobile.values && errorsMobile.values[index]?.ean && <Text style={styles.errorText}>{errorsMobile.values && errorsMobile.values[index]?.ean.message as string}</Text>}
+                              </View>
+                                <View style={[dropdownStyles.container,{width: '40%',paddingLeft: 0,paddingRight: 20, paddingTop: 0}]}>
+                                <Label text="Quantidade" />
+                                <Controller
+                                  key={field.id}
+                                  control={controlMobile}
+                                  name={`values.${index}.quantity`}
+                                  render={({ field: { onChange, value, onBlur } }) => {
+                                    return(
+                                    <View style={{ display:'flex',flexDirection:'row' }}>
+                                      <TextInput
+                                        style={[
+                                          styles.input,
+                                          errorsMobile.values && errorsMobile.values[index]?.quantity && styles.inputError,
+                                          focusedField === `quantity.${index}` && styles.inputFocused, {flex: 5}
+                                        ]}
+                                        placeholder="0"
+                                        placeholderTextColor={'#fafafa'}
+                                        onChangeText={onChange}
+                                        value={value.toString() == '0' ? '' : value.toString()}
+                                        onBlur={() => { onBlur(); setFocusedField(null); }}
+                                        onFocus={() => setFocusedField(`quantity.${index}`)}
+                                        keyboardType="numeric"
+                                      />
+                                      <TouchableOpacity style={styles.buttonView} onPress={() => {toggleCameraState(index)}}>
+                                            <FontAwesome6 name="barcode" size={24} color="black" />
+                                        </TouchableOpacity>
+                                    </View>
+                                  )}}
+                                />
+                                {errorsMobile.values && errorsMobile.values[index]?.quantity && <Text style={styles.errorText}>{errorsMobile.values && errorsMobile.values[index]?.quantity.message as string}</Text>}
+                              </View>
+                            </View>
+                            
+                          );
+                        })}
+                      </View>
+                    <View style={{flexDirection: 'row', width: '100%', justifyContent:'space-between'}}>
+                      <TouchableOpacity style={[dropdownStyles.container,{width:'50%',overflow:'hidden'}]} onPress={() => {appendMobile({ean: '', quantity: 0} as InventoryMobileForm)}}>
+                          <Text style={styles.addLine} numberOfLines={1}>Adicionar Linha...</Text>
+                      </TouchableOpacity>
+                      <ActivityIndicator size="large" animating={isProcessing} style={{justifyContent: 'center'}}  />
+                      <TouchableOpacity style={[Style.buttonSecondary, shadow, {marginBottom:'auto',marginTop:'auto',height:'auto',justifyContent:'center', marginRight: 30}]} onPress={handleSubmitMobile(onSubmitMobile)}>
+                          <Text style={styles.textPrimary}>Guardar</Text>
+                      </TouchableOpacity>
+                    </View>
+                </ScrollView>
+
+
                 
-                { cameraActive &&
-                  <CameraView barcodeScannerSettings={{ barcodeTypes: ['ean13','ean8','code128','code39','code93','codabar']}} onBarcodeScanned={(barcode) => {console.log(barcode);setValueMobile('ean',barcode.data)}} style={{ height: '100%'}} facing={'back'} />
-                }
+                <Modal visible={cameraActive} animationType="fade" transparent>
+                  <CameraView barcodeScannerSettings={{ barcodeTypes: ['ean13','ean8','code128','code39','code93','codabar']}} 
+                          onBarcodeScanned={(barcode) => {readBarcode(barcode.data)}} 
+                          style={{ height: '100%'}} facing={'back'} enableTorch={torch} >
+                            
+                            <SafeAreaView style={{alignSelf:'center',marginTop:'auto', marginBottom:80}}>
+
+                              <View style={{flexDirection:'row', justifyContent:'space-between', width: '100%',paddingLeft: 40, paddingRight: 40}}>
+                                <TouchableOpacity onPress={() => {setCameraActive(false)}}>
+                                  <AntDesign name="closecircleo" size={36} color="white" />
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => {setTorch(!torch)}}>
+                                  {!torch &&<MaterialIcons name="flashlight-on" size={36} color="white" />}
+                                  {torch  && <MaterialIcons name="flashlight-off" size={36} color="white" /> }
+                                </TouchableOpacity>
+                              </View>
+
+                            </SafeAreaView>
+                    </CameraView>
+                </Modal>
+                
             </View>
           
         
@@ -581,7 +697,7 @@ const styles = StyleSheet.create({
       ...(Platform.OS === "web" ? { boxShadow: `0 0 0 2px ${ACCENT}20` } : null),
     },
     pagePad: { flex: 1, paddingHorizontal: 10, paddingTop: 10 },
-
+addLine: { color: ACCENT, marginTop: 6,fontSize: 16 },
   tableBox: {
     width: "100%",
     borderRadius: 8,
