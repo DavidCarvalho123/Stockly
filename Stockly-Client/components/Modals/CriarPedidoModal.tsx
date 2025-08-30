@@ -469,7 +469,7 @@ const styles = StyleSheet.create({
     outlineColor: "transparent",
     ...(Platform.OS === "web" ? { boxShadow: "none" as any } : null),
   },
-  pickerInner: { height: 44 },
+  pickerInner: { height: 60 },
 
   row2: { flexDirection: "row", flexWrap: "wrap" },
 

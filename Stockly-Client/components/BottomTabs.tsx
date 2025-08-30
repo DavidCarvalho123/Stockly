@@ -29,7 +29,7 @@ const BottomTabs: React.FC<Props> = ({updateComponent}) => {
                                 <Text style={styles.text}>Inventário</Text>
                             
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Manutenção Produtos")}>
+                        <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Pedidos")}>
                             <MaterialCommunityIcons name="transfer" size={24} color="white" />
                             <Text style={styles.text}>Pedidos</Text>
                         </TouchableOpacity>

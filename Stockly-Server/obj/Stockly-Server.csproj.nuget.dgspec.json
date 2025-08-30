@@ -10,11 +10,11 @@
         "projectUniqueName": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj",
         "projectName": "Stockly-Server",
         "projectPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj",
-        "packagesPath": "/var/root/.nuget/packages/",
+        "packagesPath": "/Users/jfernandes/.nuget/packages/",
         "outputPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/var/root/.nuget/NuGet/NuGet.Config"
+          "/Users/jfernandes/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
