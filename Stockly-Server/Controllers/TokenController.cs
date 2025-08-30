@@ -75,7 +75,7 @@ namespace Stockly_Server.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(10),
+                expires: DateTime.Now.AddHours(4),
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
