@@ -13,6 +13,64 @@ namespace Stockly_Server.Controllers
     {
         public PedidosController() { }
 
+        
+
+        [HttpGet("GetAllPedidos")]
+        public IActionResult GetAllPedidos()
+        {
+            try
+            {
+                using var context = new StocklyContext();
+
+                // Carrega pedidos com navegações necessárias
+                var pedidos = context.Pedidos
+                    .Include(p => p.IdLocalizacaoNavigation)
+                    .Include(p => p.IdLocalizacaoDestinoNavigation)
+                    .Include(p => p.LinhasPedidos)
+                        .ThenInclude(lp => lp.EstadoInicialNavigation)
+                    .Include(p => p.LinhasPedidos)
+                        .ThenInclude(lp => lp.EstadoFinalNavigation)
+                    .ToList() // materializa para podermos calcular "Misto" em memória
+                    .Select(p =>
+                    {
+                        // Derivar o nome do estado inicial
+                        var inicNomes = p.LinhasPedidos
+                            .Select(lp => lp.EstadoInicialNavigation?.Estado1 ?? "Desconhecido")
+                            .Distinct()
+                            .ToList();
+                        var estadoInicial = inicNomes.Count == 1 ? inicNomes[0] : "Misto";
+
+                        // Derivar o nome do estado final
+                        var finalNomes = p.LinhasPedidos
+                            .Select(lp => lp.EstadoFinalNavigation?.Estado1 ?? "Desconhecido")
+                            .Distinct()
+                            .ToList();
+                        var estadoFinal = finalNomes.Count == 1 ? finalNomes[0] : "Misto";
+
+                        return new
+                        {
+                            id = p.Id,
+                            numero = p.Id, // se tiveres coluna específica de número, troca aqui
+                            origem = p.IdLocalizacaoNavigation?.Nome ?? "Desconhecido",
+                            destino = p.IdLocalizacaoDestinoNavigation?.Nome ?? "Desconhecido",
+                            estadoInicial,
+                            estadoFinal,
+                            observacoes = p.Observacoes ?? string.Empty,
+                            concluido = p.Concluido ?? false
+                        };
+                    })
+                    .ToList();
+
+                return Ok(pedidos);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+        
+        
+        
         // devolve Id+1 (ou 1 se vazio)
         [HttpGet("GetNextNumero")]
         public IActionResult GetNextNumero()
@@ -101,7 +159,7 @@ namespace Stockly_Server.Controllers
                 });
             }
         }
-
+        
         // Helper → obtém ou cria StocksPorEstado
         private static StocksPorEstado GetOrCreateSpe(StocklyContext context, int produtoId, int localizacaoId, int estadoId)
         {

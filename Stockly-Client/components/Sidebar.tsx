@@ -33,15 +33,13 @@ const Sidebar: React.FC<Props> = ({ parentStyle, updateComponent }) => {
 
 
                     <Text style={styles.categories}>
-                        Pedidos
+                        Transferências
                     </Text>
 
-                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Criar Pedidos")}>
-                        <Text style={Style.textButtonPrimary}>Criar Pedidos</Text>
+                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Pedidos")}>
+                        <Text style={Style.textButtonPrimary}>Pedidos</Text>
                     </Pressable>
-                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Tratar Pedidos")}>
-                        <Text style={Style.textButtonPrimary}>Tratar Pedidos</Text>
-                    </Pressable>
+                 
 
 
                     <Text style={styles.categories}>

@@ -3,9 +3,7 @@ import { LoginForm, Token } from "@/models/Login";
 import { InventoryForm, InventoryMobileForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://192.168.1.81:8082/api/';
-
-// ----------- Autenticação -----------
+const baseUrl = 'http://192.168.1.211:8082/api/';
 
 export const Login = async (loginForm:LoginForm) => {
   var results: Response = new Response();
@@ -468,4 +466,40 @@ export const CreatePedido = async (payload: CreatePedidoPayload) => {
 
   if (!resp.ok) throw new Error(await resp.text());
   return await resp.json(); // { message, pedidoId, numero }
+};
+
+// -------- Pedidos: listar --------
+import type { PedidosTransferencia } from "@/models/Pedidos";
+
+export const GetAllPedidos = async (): Promise<PedidosTransferencia[]> => {
+  let results: PedidosTransferencia[] = [];
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) return results;
+
+  const { token } = JSON.parse(auth) as Token;
+  try {
+    const resp = await fetch(baseUrl + "Pedidos/GetAllPedidos", {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (!resp.ok) {
+      console.error("GetAllPedidos failed:", resp.status, await resp.text());
+      return results;
+    }
+    const json = await resp.json();
+    // O backend pode devolver nomes já resolvidos; caso não, caímos para IDs
+    results = (json ?? []).map((p: any) => ({
+      id: p.id ?? p.Id,
+      numero: p.numero ?? p.id ?? p.Id,                  // se tiveres campo 'numero'
+      origem: p.origem ?? p.origemNome ?? p.origemId ?? p.IdLocalizacao ?? "",
+      destino: p.destino ?? p.destinoNome ?? p.destinoId ?? p.IdLocalizacaoDestino ?? "",
+      estadoInicial: p.estadoInicial ?? p.estadoInicialNome ?? p.estadoInicialId ?? "",
+      estadoFinal: p.estadoFinal ?? p.estadoFinalNome ?? p.estadoFinalId ?? "",
+      observacoes: p.observacoes ?? p.Observacoes ?? "",
+      concluido: Boolean(p.concluido ?? p.Concluido ?? false),
+      // mantém quaisquer outros campos que o teu PedidosTransferencia tenha
+    }));
+  } catch (e) {
+    console.error("GetAllPedidos error:", e);
+  }
+  return results;
 };

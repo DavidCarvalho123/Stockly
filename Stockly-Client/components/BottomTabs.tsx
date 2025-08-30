@@ -29,9 +29,9 @@ const BottomTabs: React.FC<Props> = ({currentComponent, updateComponent}) => {
                                 <Text style={[styles.text, currentComponent == 'Inventário' ? {borderBottomWidth:  2,borderColor:'#d2effd', color:'#d2effd'} : {}]}>Inventário</Text>
                             
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Criar Pedidos")}>
-                            <MaterialCommunityIcons name="transfer" size={24} color={currentComponent == 'Criar Pedidos' ? "#d2effd": "white"} />
-                            <Text style={[styles.text, currentComponent == 'Criar Pedidos' ? {borderBottomWidth:  2,borderColor:'#d2effd', color:'#d2effd'} : {}]}>Pedidos</Text>
+                        <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Pedidos")}>
+                            <MaterialCommunityIcons name="transfer" size={24} color={currentComponent == 'Pedidos' ? "#d2effd": "white"} />
+                            <Text style={[styles.text, currentComponent == 'Pedidos' ? {borderBottomWidth:  2,borderColor:'#d2effd', color:'#d2effd'} : {}]}>Pedidos</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Representação 3D")}>
                             <AntDesign name="search1" size={24} color={currentComponent == 'Representação 3D' ? "#d2effd": "white"} />

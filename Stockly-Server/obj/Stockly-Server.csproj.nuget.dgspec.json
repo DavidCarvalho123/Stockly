@@ -9,17 +9,15 @@
       "restore": {
         "projectUniqueName": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj",
         "projectName": "Stockly-Server",
-        "projectPath": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\Stockly-Server.csproj",
-        "packagesPath": "C:\\Users\\David\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\David\\Documents\\Escola\\Curso Superior\\Licenciatura\\2A.2S\\PI\\Stockly\\Stockly-Server\\obj\\",
+        "projectPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/Stockly-Server.csproj",
+        "packagesPath": "/Users/jfernandes/.nuget/packages/",
+        "outputPath": "/Users/jfernandes/Documents/piaget/3 ano/2ºsemestre/Projeto Integrador/repo/Stockly/Stockly-Server/obj/",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\David\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/var/root/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
