@@ -14,10 +14,10 @@ interface Props {
 }
 const BottomTabs: React.FC<Props> = ({currentComponent, updateComponent}) => {
     const context = useContext(AuthContext);
-    
+    console.log(context.is3D);
     return(
         <>
-            <SafeAreaView style={{flex: 1, backgroundColor: context.is3D ? '#000000' : ''}}>
+            <SafeAreaView style={{flex: 1, backgroundColor: context.is3D ? '#000000' : '#F2F2F2'}}>
                 <View style={styles.container}>
                     <View style={styles.buttons}>
                         <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Manutenção Produtos")}>
