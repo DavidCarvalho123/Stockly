@@ -96,7 +96,7 @@ namespace Stockly_Server.Controllers
             {
                 Pedido ped = new Pedido()
                 {
-                    IdUtilizador = 5,
+                    IdUtilizador = context.Utilizadores.FirstOrDefault().Id,
                     Observacoes = "Transferencia",
                     IdLocalizacao = pedido.OrigemId,
                     IdLocalizacaoDestino = pedido.DestinoId,

@@ -1,3 +1,4 @@
+import { Colours } from "@/libs/Constants";
 import {
   CreatePedido,
   GetAllLocals,
@@ -8,7 +9,12 @@ import {
 } from "@/libs/Requests";
 import Style from "@/libs/Style";
 import { Estado } from "@/models/Estados";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { Picker } from "@react-native-picker/picker";
+import { CameraView, useCameraPermissions } from "expo-camera";
+import * as Haptics from 'expo-haptics';
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
@@ -22,6 +28,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Dropdown } from 'react-native-element-dropdown';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Local = { id: number; nome: string };
 
@@ -53,8 +61,9 @@ const LineItem = memo(function LineItem(props: {
   onCommitEAN: (key: number, v: string) => void;
   onChangeQtd: (key: number, v: string) => void;
   onRemove: (key: number) => void;
+  toggleCameraState : (key: number) => void;
 }) {
-  const { idx, ln, onCommitEAN, onChangeQtd, onRemove } = props;
+  const { idx, ln, onCommitEAN, onChangeQtd, onRemove, toggleCameraState } = props;
 
   const [eanLocal, setEanLocal] = useState<string>(ln.ean ?? "");
   useEffect(() => setEanLocal(ln.ean ?? ""), [ln.ean, ln.key]);
@@ -68,8 +77,6 @@ const LineItem = memo(function LineItem(props: {
   <TextInput
     style={[styles.input, ln.errEAN ? styles.inputError : null, { flex: 1 }]}
     placeholder="EAN"
-    inputMode={Platform.OS === "web" ? "numeric" : undefined}
-    keyboardType={Platform.OS === "web" ? "numeric" : "number-pad"}
     value={eanLocal}
     onChangeText={setEanLocal}
     onBlur={() => onCommitEAN(ln.key, eanLocal.trim())}
@@ -77,10 +84,10 @@ const LineItem = memo(function LineItem(props: {
   />
   {Platform.OS !== "web" && (
     <TouchableOpacity
-      style={styles.btnScan}
-      onPress={() => Alert.alert("Scan EAN", "Funcionalidade em implementação")}
+      style={{padding: 12}}
+      onPress={() => toggleCameraState(ln.key)}
     >
-      <Text style={{ color: "#fff", fontWeight: "700" }}>📷</Text>
+      <FontAwesome6 name="barcode" size={24} color="black" />
     </TouchableOpacity>
   )}
 </View>
@@ -122,13 +129,15 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
   const [locais, setLocais] = useState<Local[]>([]);
   const [estados, setEstados] = useState<Estado[]>([]);
   const [pedidoNumero, setPedidoNumero] = useState<number>(1);
-
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [destinoId, setDestinoId] = useState<number | undefined>();
   const [origemId, setOrigemId] = useState<number | undefined>();
   const [estadoInicialId, setEstadoInicialId] = useState<number | undefined>();
   const [estadoFinalId, setEstadoFinalId] = useState<number | undefined>();
-
-
+  const [lastSelectedEan, setLastSelectedEan] = useState<number>(0); 
+  const [permission, requestPermission] = useCameraPermissions();
+  const [cameraActive, setCameraActive] = useState<boolean>(false);
+  const [torch, setTorch] = useState<boolean>(false);
 
   const [linhas, setLinhas] = useState<Linha[]>([EMPTY_LINE(1)]);
   const [submitting, setSubmitting] = useState(false);
@@ -204,7 +213,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
 
       const isLast = idx === copy.length - 1;
       const preenchida = (ln.ean || "").trim().length > 0 && q > 0;
-      if (isLast && preenchida) copy.push(EMPTY_LINE(copy[copy.length - 1].key + 1));
+      //if (isLast && preenchida) copy.push(EMPTY_LINE(copy[copy.length - 1].key + 1));
       return copy;
     });
   }, []);
@@ -330,6 +339,25 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
     }
   }, [destinoId, estadoInicialId, estadoFinalId, linhas, limpar, onClose]);
 
+  const handleToggleCameraState = (index: number) => {
+    setLastSelectedEan(index);
+    setCameraActive(!cameraActive);
+  }
+
+  const readBarcode = (data:string) => {
+      setCameraActive(false);
+      setTorch(false);
+      //setValueMobile(`values.${lastSelectedEan}.ean`,data);
+      setLinhas((prev) => {
+        const copy = [...prev];
+        const idx = copy.findIndex((l) => l.key === lastSelectedEan);
+        if(idx >= 0) copy[idx] = { ...copy[idx], ean: data, errEAN: null};
+        return copy;
+      });
+      console.log(data);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft)
+    }
+
   if (!visible) return null;
 
   return (
@@ -340,69 +368,145 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
           <Text style={styles.subtitle}>Pedido Nr: {pedidoNumero}</Text>
 
           <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
-            {/* <Text style={styles.label}>Destino</Text>
-            <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
-              <Picker selectedValue={destinoId} onValueChange={(v) => setDestinoId(v)} style={styles.pickerInner}>
-                <Picker.Item label="-- Seleciona --" value={undefined} />
-                {locais.map((l) => (
-                  <Picker.Item key={l.id} label={l.nome} value={l.id} />
-                ))}
-              </Picker>
-            </View> */}
 
-
-            <View style={[styles.row2, { gap: 16 }]}>
+            {Platform.OS === 'web' && 
+            <>
+              <View style={[styles.row2, { gap: 16 }]}>
+                    <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>Origem</Text>
+                  <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                    <Picker selectedValue={origemId} onValueChange={(v) => setOrigemId(v)} style={styles.pickerInner}>
+                      <Picker.Item label="-- Seleciona --" value={undefined} />
+                      {locais.map((l) => (
+                        <Picker.Item key={l.id} label={l.nome} value={l.id} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
                   <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Origem</Text>
-                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
-                  <Picker selectedValue={origemId} onValueChange={(v) => setOrigemId(v)} style={styles.pickerInner}>
-                    <Picker.Item label="-- Seleciona --" value={undefined} />
-                    {locais.map((l) => (
-                      <Picker.Item key={l.id} label={l.nome} value={l.id} />
-                    ))}
-                  </Picker>
-                </View>
-               </View>
-                 <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Destino</Text>
-                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
-                  <Picker selectedValue={destinoId} onValueChange={(v) => setDestinoId(v)} style={styles.pickerInner}>
-                    <Picker.Item label="-- Seleciona --" value={undefined} />
-                    {locais.map((l) => (
-                      <Picker.Item key={l.id} label={l.nome} value={l.id} />
-                    ))}
-                  </Picker>
+                  <Text style={styles.label}>Destino</Text>
+                  <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                    <Picker selectedValue={destinoId} onValueChange={(v) => setDestinoId(v)} style={styles.pickerInner}>
+                      <Picker.Item label="-- Seleciona --" value={undefined} />
+                      {locais.map((l) => (
+                        <Picker.Item key={l.id} label={l.nome} value={l.id} />
+                      ))}
+                    </Picker>
+                  </View>
                 </View>
               </View>
-            </View>
+              <View style={[styles.row2, { gap: 16 }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>Estado Inicial</Text>
+                  <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                    <Picker selectedValue={estadoInicialId} onValueChange={(v) => setEstadoInicialId(v)} style={styles.pickerInner}>
+                      <Picker.Item label="-- Seleciona --" value={undefined} />
+                      {estados.map((e) => (
+                        <Picker.Item key={e.id} label={e.nome} value={e.id} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
 
-
-
-            <View style={[styles.row2, { gap: 16 }]}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Estado Inicial</Text>
-                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
-                  <Picker selectedValue={estadoInicialId} onValueChange={(v) => setEstadoInicialId(v)} style={styles.pickerInner}>
-                    <Picker.Item label="-- Seleciona --" value={undefined} />
-                    {estados.map((e) => (
-                      <Picker.Item key={e.id} label={e.nome} value={e.id} />
-                    ))}
-                  </Picker>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.label}>Estado Final</Text>
+                  <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
+                    <Picker selectedValue={estadoFinalId} onValueChange={(v) => setEstadoFinalId(v)} style={styles.pickerInner}>
+                      <Picker.Item label="-- Seleciona --" value={undefined} />
+                      {estados.map((e) => (
+                        <Picker.Item key={e.id} label={e.nome} value={e.id} />
+                      ))}
+                    </Picker>
+                  </View>
+                </View>
+              </View>
+            </>}
+            {Platform.OS !== 'web' &&
+            <>
+              <View style={[styles.row2, { gap: 16, marginBottom: 20 }]}>
+                <View style={{ flex: 1 }}>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'origem' && { borderColor: Colours.stocklyBlue }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Origem"
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={locais}
+                    value={origemId}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("origem")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      setOrigemId(item.id);
+                    }}
+                  />
+                </View>
+                <View style={{ flex: 1}}>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'destino' && { borderColor: Colours.stocklyBlue }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Destino"
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={locais}
+                    value={destinoId}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("destino")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      setDestinoId(item.id);
+                    }}
+                  />
                 </View>
               </View>
 
-              <View style={{ flex: 1 }}>
-                <Text style={styles.label}>Estado Final</Text>
-                <View style={[styles.pickerBox, Platform.OS === "web" && webClickable]}>
-                  <Picker selectedValue={estadoFinalId} onValueChange={(v) => setEstadoFinalId(v)} style={styles.pickerInner}>
-                    <Picker.Item label="-- Seleciona --" value={undefined} />
-                    {estados.map((e) => (
-                      <Picker.Item key={e.id} label={e.nome} value={e.id} />
-                    ))}
-                  </Picker>
+              <View style={[styles.row2, { gap: 16 }]}>
+                <View style={{ flex: 1 }}>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'estadoInicial' && { borderColor: Colours.stocklyBlue }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Estado Inicial"
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={estados}
+                    value={estadoInicialId}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("estadoInicial")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      setEstadoInicialId(item.id);
+                    }}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Dropdown
+                    style={[dropdownStyles.dropdown, focusedField === 'estadoFinal' && { borderColor: Colours.stocklyBlue }]}
+                    placeholderStyle={dropdownStyles.placeholderStyle}
+                    placeholder="Estado Final"
+                    selectedTextStyle={dropdownStyles.selectedTextStyle}
+                    inputSearchStyle={dropdownStyles.inputSearchStyle}
+                    iconStyle={dropdownStyles.iconStyle}
+                    data={estados}
+                    value={estadoFinalId}
+                    labelField="nome"
+                    valueField="id"
+                    onFocus={() => setFocusedField("estadoFinal")}
+                    onBlur={() => setFocusedField(null)}
+                    onChange={item => {
+                      setEstadoFinalId(item.id);
+                    }}
+                  />
                 </View>
               </View>
-            </View>
+            </>
+            }
+
 
             <View style={{ marginTop: 12 }}>
               {linhas.map((ln, i) => (
@@ -413,6 +517,7 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
                   onCommitEAN={handleCommitEAN}
                   onChangeQtd={handleChangeQtd}
                   onRemove={handleRemoveLinha}
+                  toggleCameraState={handleToggleCameraState}
                 />
               ))}
 
@@ -440,6 +545,26 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
+         <Modal visible={cameraActive} animationType="fade" transparent>
+            <CameraView barcodeScannerSettings={{ barcodeTypes: ['ean13','ean8','code128','code39','code93','codabar']}} 
+                    onBarcodeScanned={(barcode) => {readBarcode(barcode.data)}} 
+                    style={{ height: '100%'}} facing={'back'} enableTorch={torch} >
+                      
+                      <SafeAreaView style={{alignSelf:'center',marginTop:'auto', marginBottom:80}}>
+
+                        <View style={{flexDirection:'row', justifyContent:'space-between', width: '100%',paddingLeft: 40, paddingRight: 40}}>
+                          <TouchableOpacity onPress={() => {setCameraActive(false)}}>
+                            <AntDesign name="closecircleo" size={36} color="white" />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => {setTorch(!torch)}}>
+                            {!torch &&<MaterialIcons name="flashlight-on" size={36} color="white" />}
+                            {torch  && <MaterialIcons name="flashlight-off" size={36} color="white" /> }
+                          </TouchableOpacity>
+                        </View>
+
+                      </SafeAreaView>
+              </CameraView>
+          </Modal>
       </View>
     </Modal>
   );
@@ -447,9 +572,48 @@ const CriarPedidoModal: React.FC<Props> = ({ visible, onClose }) => {
 
 export default CriarPedidoModal;
 
+const dropdownStyles = StyleSheet.create({
+  container: {
+      padding: 16,
+    },
+    dropdown: {
+      backgroundColor: 'white',
+      height: 50,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+    },
+    icon: {
+      marginRight: 5,
+    },
+    label: {
+      position: 'absolute',
+      backgroundColor: '#fafafa',
+      left: 22,
+      top: 8,
+      zIndex: 999,
+      paddingHorizontal: 8,
+      fontSize: 14,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+    },
+});
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center", padding: 10 },
-  modal: { backgroundColor: "#FFF", borderRadius: 12, padding: 20, width: Platform.select({ web: "30%", default: "90%" }), maxHeight: "90%" },
+  modal: { backgroundColor: "#FFF", borderRadius: 12, padding: 20, width: Platform.select({ web: "30%", default: "100%" }), maxHeight: "90%" },
   title: { fontSize: 20, fontWeight: "700", color: "#111", textAlign: "center" },
   subtitle: { fontSize: 13, color: "#666", textAlign: "center", marginBottom: 10, marginTop: 4 },
 

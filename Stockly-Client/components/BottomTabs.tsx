@@ -17,7 +17,7 @@ const BottomTabs: React.FC<Props> = ({currentComponent, updateComponent}) => {
     
     return(
         <>
-            <SafeAreaView style={{flex: 1, backgroundColor: context.is3D ? '#000000' : ''}}>
+            <SafeAreaView style={{flex: 1, backgroundColor: context.is3D ? '#000000' : '#f2f2f2'}}>
                 <View style={styles.container}>
                     <View style={styles.buttons}>
                         <TouchableOpacity style={styles.buttonView} onPress={updateComponent("Manutenção Produtos")}>

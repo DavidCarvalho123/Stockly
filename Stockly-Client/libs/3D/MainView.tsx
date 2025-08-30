@@ -11,6 +11,7 @@ import { Colours } from "../Constants";
 import { GetStoredGraphics } from "../Requests";
 import Style from "../Style";
 import { MobileMapControls } from "./MobileMapControls";
+import { Rackmobile } from "./Rackmobile";
 import { Tablemobile } from "./Tablemobile";
 
 // Main Floor of the currently seleced location
@@ -103,8 +104,8 @@ const MainView =
   const panX = useSharedValue(0);
   const panY = useSharedValue(0);
   const scale = useSharedValue(1);
-  const rotationX = useSharedValue(0);
-  const rotationY = useSharedValue(0);
+  const rotation = useSharedValue(0);
+  const savedRotation = useSharedValue(1);
 
   const panGesture = Gesture.Pan().onUpdate((e) => {
     panX.value = e.translationX;
@@ -114,16 +115,24 @@ const MainView =
     panY.value = 0;
   });
 
-  const pinchGesture = Gesture.Pinch().onUpdate((e) => {
-    scale.value = e.scale;
+  const pinchGesture = Gesture.Pinch().onBegin(() => {
+    scale.value = 1; // reset at the start
+  })
+  .onUpdate((e) => {
+    scale.value = e.scale; // absolute scale since pinch start
+  })
+  .onEnd(() => {
+    scale.value = 1; // reset after pinch ends
   });
 
-  const rotateGesture = Gesture.Pan()
-  .minPointers(2) // two-finger drag for rotation
-  .onUpdate((e) => {
-    rotationX.value = e.translationX;
-    rotationY.value = e.translationY;
-  });
+  const rotateGesture = Gesture.Rotation()
+    .onUpdate((e) => {
+      rotation.value = savedRotation.value + e.rotation;
+    })
+    .onEnd(() => {
+      savedRotation.value = rotation.value;
+    });
+
 
   const gesture = Gesture.Simultaneous(panGesture, pinchGesture, rotateGesture);
   
@@ -139,7 +148,7 @@ const MainView =
           <GestureHandlerRootView>
             <Canvas shadows={"variance"} style={{backgroundColor:'black'}} camera={{ position:[-treeData.sizeX/2,500,-treeData.sizeZ], near: 0.1, far: 100000  }}>
                 <Suspense fallback={<Loader/>}>
-                  <MobileMapControls panX={panX} panY={panY} scale={scale} rotationX={rotationX} rotationY={rotationY} />
+                  <MobileMapControls panX={panX} panY={panY} scale={scale} rotation={rotation} />
                   <spotLight ref={spotRef}  position={[-treeData.sizeX/2,500,-treeData.sizeZ]} angle={Math.PI} penumbra={1} decay={0} intensity={5} />
                   <spotLight ref={spotRef2} position={[-treeData.sizeX,500,-treeData.sizeZ/2]} angle={Math.PI/2} penumbra={1} decay={0} intensity={5} />
                   <spotLight ref={spotRef3} position={[treeData.sizeX/2,500,-treeData.sizeZ/2]} angle={Math.PI} penumbra={1} decay={0} intensity={5} />
@@ -148,10 +157,19 @@ const MainView =
 
 
                   <MainPlane nodeProps={treeData} ref={floorRef}/>
-                  {dbSavedObjs.map((ref, i) => (
-                    <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
-                    
-                    ))}
+                  {dbSavedObjs.map((ref, i) => {
+                    if(ref.obj.name == 'mesa'){
+                      return(
+                        <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
+                      )
+                    }
+                    else if (ref.obj.name == 'rack'){
+
+                      return(
+                        <Rackmobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
+                      );
+                    }
+                    })}
                   
                 </Suspense>
             </Canvas>
