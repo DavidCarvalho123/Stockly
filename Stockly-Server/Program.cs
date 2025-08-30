@@ -22,9 +22,10 @@ builder.Services.AddIdentity<Utilizadore, Acesso>(
     {
         options.Password.RequiredUniqueChars = 0;
         options.Password.RequireUppercase = true;
-        options.Password.RequiredLength = 8;
-        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 12;
+        options.Password.RequireNonAlphanumeric = true;
         options.Password.RequireLowercase = false;
+        options.Password.RequireDigit = true;
     })
     .AddRoles<Acesso>()
     .AddEntityFrameworkStores<StocklyContext>()
