@@ -1,4 +1,5 @@
 import CriarPedidoModal from "@/components/Modals/CriarPedidoModal";
+import TratarPedidoModal from "@/components/Modals/TratarPedidoModal";
 import { Colours } from "@/libs/Constants";
 import { GetAllPedidos } from "@/libs/Requests";
 import Style from "@/libs/Style";
@@ -6,14 +7,12 @@ import type { PedidosTransferencia } from "@/models/Pedidos";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 // ---- Definição das colunas (web) ----
@@ -60,49 +59,6 @@ const FilterBox: React.FC<{ value: string; onChange: (t: string) => void; placeh
   );
 };
 
-/* ---------- Modal Tratar (placeholder) ---------- */
-const TratarPedidoModal: React.FC<{
-  visible: boolean;
-  pedido?: PedidosTransferencia | null;
-  onClose: () => void;
-}> = ({ visible, pedido, onClose }) => {
-  if (!visible || !pedido) return null;
-  return (
-    <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.ovl}>
-        <View style={styles.tratarBox}>
-          <Text style={styles.tratarTitle}>Tratar Pedido #{String(pedido.id)}</Text>
-          <View style={{ gap: 8, marginTop: 10 }}>
-            <Text>
-              <Text style={styles.bold}>Origem:</Text> {String(pedido.origem ?? "")}
-            </Text>
-            <Text>
-              <Text style={styles.bold}>Destino:</Text> {String(pedido.destino ?? "")}
-            </Text>
-            <Text>
-              <Text style={styles.bold}>Estado Inicial:</Text> {String(pedido.estadoInicial ?? "")}
-            </Text>
-            <Text>
-              <Text style={styles.bold}>Estado Final:</Text> {String(pedido.estadoFinal ?? "")}
-            </Text>
-            {!!pedido.observacoes && (
-              <Text>
-                <Text style={styles.bold}>Obs.:</Text> {pedido.observacoes}
-              </Text>
-            )}
-          </View>
-          <View style={{ marginTop: 18, flexDirection: "row", justifyContent: "center" }}>
-            <TouchableOpacity style={[Style.buttonPrimary, { minWidth: 140 }]} onPress={onClose}>
-              <Text style={Style.textButtonPrimary}>Fechar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
-};
-
-/* ---------- Página ---------- */
 const Pedidos: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
 
@@ -119,9 +75,7 @@ const Pedidos: React.FC = () => {
     setFiltered(data || []);
   };
 
-  useEffect(() => {
-    load();
-  }, []);
+  useEffect(() => { load(); }, []);
 
   useEffect(() => {
     const f = rows.filter((r) =>
@@ -167,7 +121,7 @@ const Pedidos: React.FC = () => {
     [filters],
   );
 
-  // --- Layout WEB: tabela completa ---
+  // --- Layout WEB ---
   const WebTable = () => (
     <View style={styles.pagePad}>
       <View style={styles.tableBox}>
@@ -182,29 +136,14 @@ const Pedidos: React.FC = () => {
                   <View key={`${p.id}-acao`} style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}>
                     <Pressable
                       style={[Style.buttonSecondary, styles.btnSmall, styles.shadow, styles.tratar]}
-                      onPress={() => {
-                        setSelected(p);
-                        setTreatOpen(true);
-                      }}
+                      onPress={() => { setSelected(p); setTreatOpen(true); }}
                     >
                       <Text style={Style.textButtonSecondary}>Tratar</Text>
                     </Pressable>
                   </View>
                 );
               }
-
-              const val =
-                c.key === "concluido" ? (p.concluido ? "Sim" : "Não") : String((p as any)[c.key] ?? "");
-
-              // 👉 Web: o nº do pedido (id) é texto simples (não abre modal)
-              if (c.key === "id") {
-                return (
-                  <View key={`${p.id}-id`} style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}>
-                    <CellText text={val} />
-                  </View>
-                );
-              }
-
+              const val = c.key === "concluido" ? (p.concluido ? "Sim" : "Não") : String((p as any)[c.key] ?? "");
               return (
                 <View key={`${p.id}-${c.key}`} style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}>
                   <CellText text={val} />
@@ -217,7 +156,7 @@ const Pedidos: React.FC = () => {
     </View>
   );
 
-  // --- Layout MOBILE: lista resumida; tocar no número abre modal ---
+  // --- Layout MOBILE: cartões; tocar no número abre modal ---
   const MobileList = () => (
     <FlatList
       data={filtered}
@@ -225,24 +164,13 @@ const Pedidos: React.FC = () => {
       contentContainerStyle={{ padding: 12, paddingBottom: 40 }}
       renderItem={({ item }) => (
         <View style={styles.card}>
-          <Pressable onPress={() => {
-            setSelected(item);
-            setTreatOpen(true);
-          }}>
+          <Pressable onPress={() => { setSelected(item); setTreatOpen(true); }}>
             <Text style={styles.cardTitle}>Pedido #{String(item.id)}</Text>
           </Pressable>
-          <Text style={styles.cardLine}>
-            <Text style={styles.bold}>Origem:</Text> {String(item.origem ?? "")}
-          </Text>
-          <Text style={styles.cardLine}>
-            <Text style={styles.bold}>Destino:</Text> {String(item.destino ?? "")}
-          </Text>
-          <Text style={styles.cardLine}>
-            <Text style={styles.bold}>Inicial:</Text> {String(item.estadoInicial ?? "")}
-          </Text>
-          <Text style={styles.cardLine}>
-            <Text style={styles.bold}>Final:</Text> {String(item.estadoFinal ?? "")}
-          </Text>
+          <Text style={styles.cardLine}><Text style={styles.bold}>Origem:</Text> {String(item.origem ?? "")}</Text>
+          <Text style={styles.cardLine}><Text style={styles.bold}>Destino:</Text> {String(item.destino ?? "")}</Text>
+          <Text style={styles.cardLine}><Text style={styles.bold}>Inicial:</Text> {String(item.estadoInicial ?? "")}</Text>
+          <Text style={styles.cardLine}><Text style={styles.bold}>Final:</Text> {String(item.estadoFinal ?? "")}</Text>
         </View>
       )}
     />
@@ -257,26 +185,19 @@ const Pedidos: React.FC = () => {
         </Pressable>
       </View>
 
-      {/* Listagem */}
       {Platform.OS === "web" ? <WebTable /> : <MobileList />}
 
       {/* Modal Criar */}
       <CriarPedidoModal
         visible={createOpen}
-        onClose={() => {
-          setCreateOpen(false);
-          load();
-        }}
+        onClose={() => { setCreateOpen(false); load(); }}
       />
 
-      {/* Modal Tratar (placeholder) */}
+      {/* Modal Tratar */}
       <TratarPedidoModal
         visible={treatOpen}
-        pedido={selected}
-        onClose={() => {
-          setTreatOpen(false);
-          setSelected(null);
-        }}
+        pedidoId={selected?.id ?? null}
+        onClose={() => { setTreatOpen(false); setSelected(null); }}
       />
     </View>
   );
@@ -287,57 +208,36 @@ export default Pedidos;
 /* ====== ESTILOS ====== */
 const ROW_BORDER = "#e6e6e6";
 const HEADER_BG = "#f5f5f5";
-
 const ROW_H = 56;
 const FILTER_H = 40;
 
 const styles = StyleSheet.create({
   btnCreate: {
-    width: 160,
-    borderRadius: 20,
-    padding: 12,
-    marginTop: 20,
-    marginLeft: 20,
+    width: 160, borderRadius: 20, padding: 12, marginTop: 20, marginLeft: 20,
   },
   pagePad: { flex: 1, paddingHorizontal: 10, paddingTop: 10 },
 
   tableBox: {
-    width: "100%",
-    borderRadius: 8,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: ROW_BORDER,
-    backgroundColor: "#fff",
+    width: "100%", borderRadius: 8, overflow: "hidden",
+    borderWidth: 1, borderColor: ROW_BORDER, backgroundColor: "#fff",
   },
 
   headerRow: {
-    flexDirection: "row",
-    backgroundColor: HEADER_BG,
-    borderBottomWidth: 1,
-    borderColor: ROW_BORDER,
-    minHeight: ROW_H,
+    flexDirection: "row", backgroundColor: HEADER_BG,
+    borderBottomWidth: 1, borderColor: ROW_BORDER, minHeight: ROW_H,
   },
   headerCell: { paddingHorizontal: 8, justifyContent: "center", alignItems: "flex-start" },
   headerText: { fontWeight: "700", color: "#000" },
 
   filterRow: {
-    flexDirection: "row",
-    backgroundColor: "#fafafa",
-    borderBottomWidth: 1,
-    borderColor: ROW_BORDER,
-    minHeight: FILTER_H,
+    flexDirection: "row", backgroundColor: "#fafafa",
+    borderBottomWidth: 1, borderColor: ROW_BORDER, minHeight: FILTER_H,
   },
   filterCell: { paddingHorizontal: 5, justifyContent: "center", alignItems: "flex-start" },
   filterInput: {
-    height: FILTER_H - 10,
-    width: "100%",
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: ROW_BORDER,
-    borderRadius: 6,
-    paddingHorizontal: 10,
-    fontSize: 13,
-    outlineStyle: "none" as any,
+    height: FILTER_H - 10, width: "100%", backgroundColor: "#fff",
+    borderWidth: 1, borderColor: ROW_BORDER, borderRadius: 6,
+    paddingHorizontal: 10, fontSize: 13, outlineStyle: "none" as any,
   },
   filterInputFocused: {
     borderColor: ACCENT,
@@ -345,65 +245,37 @@ const styles = StyleSheet.create({
   },
 
   dataRow: {
-    flexDirection: "row",
-    minHeight: ROW_H,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderColor: ROW_BORDER,
+    flexDirection: "row", minHeight: ROW_H, alignItems: "center",
+    borderBottomWidth: 1, borderColor: ROW_BORDER,
   },
   dataCell: { paddingHorizontal: 13, justifyContent: "center", alignItems: "flex-start" },
   cellText: { color: "#111" },
 
-  actionCell: {
-    alignSelf: "stretch",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  actionCell: { alignSelf: "stretch", justifyContent: "center", alignItems: "center" },
 
   rowEven: { backgroundColor: "#fff" },
   rowOdd: { backgroundColor: "#fbfbfb" },
 
   btnSmall: {
-    height: 32,
-    minWidth: 92,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-    outlineStyle: "none" as any,
+    height: 32, minWidth: 92, paddingHorizontal: 12, paddingVertical: 6,
+    borderRadius: 16, alignItems: "center", justifyContent: "center",
+    alignSelf: "center", outlineStyle: "none" as any,
   },
   shadow: {
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
-
-  // Modal tratar (placeholder)
-  ovl: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center", padding: 10 },
-  tratarBox: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
-    width: Platform.OS === "web" ? "40%" : "90%",
-    maxWidth: 720,
-  },
-  tratarTitle: { fontSize: 18, fontWeight: "700", color: "#111", textAlign: "center", marginBottom: 6 },
-  bold: { fontWeight: "700" },
+  tratar: { marginBottom: 0 },
 
   // Mobile cards
   card: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
-    marginBottom: 12,
+    backgroundColor: "#fff", borderRadius: 10, padding: 12,
+    borderWidth: 1, borderColor: "#eee", marginBottom: 12,
   },
-  cardTitle: { fontSize: 16, fontWeight: "700", color: Colours.stocklyBlue, marginBottom: 6, textDecorationLine: "underline" },
+  cardTitle: {
+    fontSize: 16, fontWeight: "700", color: Colours.stocklyBlue,
+    marginBottom: 6, textDecorationLine: "underline",
+  },
   cardLine: { color: "#111", marginBottom: 2 },
-  tratar:{marginBottom:0},
+  bold: { fontWeight: "700" },
 });
