@@ -12,7 +12,10 @@ const index = () => {
     const [MainComponentTitle, setMainComponentTitle] = useState<string>('');
     const context = useContext(AuthContext);
     const updateCurrentMainComponent = (component: string) => () => {
-        if(component != 'Representação 3D' && MainComponentTitle != 'Representação 3D')context.set3D(false);
+        if(component != 'Representação 3D' )
+        {
+            context.set3D(false);
+        }
         setMainComponentTitle(component);
     }
 
@@ -38,7 +41,7 @@ const index = () => {
                     <View style={styles.activeMain}>
                         {AvailableComponents[MainComponentTitle]}
                     </View>
-                    <BottomTabs updateComponent={updateCurrentMainComponent} />
+                    <BottomTabs currentComponent={MainComponentTitle} updateComponent={updateCurrentMainComponent} />
                 </View>
             </ClickOutsideProvider>
         )

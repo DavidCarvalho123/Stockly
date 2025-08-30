@@ -20,3 +20,12 @@ export interface InventoryForm{
     stockPic2:number,
     stockReal2:number,
 }
+export interface InventoryMobileForm{
+    ean: string,
+    quantity: number
+}
+export interface InventoryMobileFormError{
+    error: string,
+    index: number,
+    produtoEan: string
+}

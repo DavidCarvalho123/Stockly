@@ -1,6 +1,6 @@
 import { renderedObjectsToSave } from "@/models/Localizacoes"; //funciona
 import { LoginForm, Token } from "@/models/Login";
-import { InventoryForm } from "@/models/Stocks";
+import { InventoryForm, InventoryMobileForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const baseUrl = 'http://192.168.1.211:8082/api/';
@@ -35,10 +35,10 @@ export const GetAllProducts = async () => {
     const auth = await AsyncStorage.getItem('jwtToken');
     if(auth !== null){
         const tokenObj = JSON.parse(auth) as Token;
-      await fetch(baseUrl + 'Produtos/GetAllProdutos', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
-        .then((resp) => resp.json())
-        .then((json) => results = json)
-        .catch((error) => console.error(error));
+        await fetch(baseUrl + 'Produtos/GetAllProdutos', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                    .then((resp) => resp.json())
+                    .then((json) => results = json)
+                    .catch((error) => console.error(error));
     }
   return results;
 }
@@ -360,6 +360,23 @@ export const UpdateInventory = async (localizacaoId: number, stocks: InventoryFo
 
   if (!resp.ok) throw new Error(await resp.text());
   return await resp.json();
+}
+
+export const UpdateInventoryMobile = async (localizacaoId: number, estado: number,stocks: InventoryMobileForm[]) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) throw new Error("Token não encontrado. Faça login novamente.");
+  const tokenObj = JSON.parse(auth) as { token: string };
+
+  const resp = await fetch(baseUrl + `Stocks/UpdateInventoryMobile/${localizacaoId}/${estado}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + tokenObj.token,
+    },
+    body: JSON.stringify(stocks),
+  });
+
+  return await resp;
 }
 
 // ---------------------------------

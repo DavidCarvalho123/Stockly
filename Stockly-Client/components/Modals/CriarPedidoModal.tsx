@@ -7,6 +7,7 @@ import {
   GetStocksByProduto,
 } from "@/libs/Requests";
 import Style from "@/libs/Style";
+import { Estado } from "@/models/Estados";
 import { Picker } from "@react-native-picker/picker";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -23,7 +24,7 @@ import {
 } from "react-native";
 
 type Local = { id: number; nome: string };
-type Estado = { id: number; nome: string };
+
 
 type Linha = {
   key: number;

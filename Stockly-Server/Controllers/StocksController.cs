@@ -231,6 +231,64 @@ namespace Stockly_Server.Controllers
             }
             return Ok();
         }
+
+        [HttpPut("UpdateInventoryMobile/{localizacaoId}/{estadoId}")]
+        public IActionResult UpdateInventoryMobile(int localizacaoId, int estadoId, [FromBody] MobileInventoryForm[] values)
+        {
+            using var context = new StocklyContext();
+            List<MobileInventoryFormErrors> errors = new List<MobileInventoryFormErrors>();
+            int index = 0;
+            foreach(MobileInventoryForm stock in values)
+            {
+                if(!context.Produtos.Any(p => p.Ean == stock.Ean))
+                {
+                    errors.Add(new MobileInventoryFormErrors { Index = index, ProdutoEan = stock.Ean, Error = "Produto não existe! É necessário criar a ficha de produto" });
+                }
+                index++;
+            }
+            if (errors.Count() > 0)
+                return NotFound(errors);
+            foreach(MobileInventoryForm stock in values)
+            {
+                try
+                {
+                    int ProdutoId = context.Produtos.Where(p => p.Ean == stock.Ean).FirstOrDefault().Id;
+                    var sqlWhere = context.StocksPorEstados.Where(s => s.IdLocalizacao == localizacaoId && s.IdProduto == ProdutoId && s.Estado == estadoId);
+                    var origStock = sqlWhere.Select(s => new { s.Id, s.Quantidade }).FirstOrDefault();
+                    if (origStock == null)
+                    {
+                        // stock não existe, criar
+                        context.StocksPorEstados.Add(new StocksPorEstado()
+                        {
+                            IdLocalizacao = localizacaoId,
+                            IdProduto = ProdutoId,
+                            Quantidade = stock.Quantity,
+                            Estado = estadoId,
+                            StockMinimo = 0
+                        });
+                        context.SaveChanges();
+                        origStock = sqlWhere.Select(s => new { s.Id, s.Quantidade }).FirstOrDefault();
+                    }
+                        
+                    context.HistoricoStocks.Add(new HistoricoStock()
+                    {
+                        IdStockEstado = origStock.Id,
+                        StockInicial = origStock.Quantidade,
+                        StockFinal = stock.Quantity,
+                        Justificativa = "Processo de Inventário - Estado FRENTE DE LOJA",
+                        Data = DateTime.Now,
+                    });
+                    context.SaveChanges();
+
+                    sqlWhere.ExecuteUpdate(u => u.SetProperty(s => s.Quantidade, stock.Quantity));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Erro a atualizar linha de stock, skipping... Error: " + e.Message);
+                }
+            }
+            return Ok();
+        }
     }
 
     public class StocksInventarioShow()
@@ -256,5 +314,16 @@ namespace Stockly_Server.Controllers
         public int stockReal1 { get; set; }
         public int stockPic2 { get; set; }
         public int stockReal2 { get; set; }
+    }
+    public class MobileInventoryForm()
+    {
+        public string Ean { get; set; }
+        public int Quantity { get; set; }
+    }
+    public class MobileInventoryFormErrors()
+    {
+        public int Index { get; set; }
+        public string ProdutoEan { get; set; }
+        public string Error { get; set; }
     }
 }
