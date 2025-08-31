@@ -8,8 +8,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Platform,
-  Pressable,
-  StyleSheet,
+  Pressable, ScrollView, StyleSheet,
   Text,
   TextInput,
   View
@@ -124,35 +123,37 @@ const Pedidos: React.FC = () => {
   // --- Layout WEB ---
   const WebTable = () => (
     <View style={styles.pagePad}>
-      <View style={styles.tableBox}>
-        {Header}
-        {FilterRow}
+      <ScrollView>
+        <View style={styles.tableBox}>
+          {Header}
+          {FilterRow}
 
-        {filtered.map((p, idx) => (
-          <View key={String(p.id)} style={[styles.dataRow, idx % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
-            {COLS.map((c, i) => {
-              if (c.key === "acao") {
+          {filtered.map((p, idx) => (
+            <View key={String(p.id)} style={[styles.dataRow, idx % 2 === 0 ? styles.rowEven : styles.rowOdd]}>
+              {COLS.map((c, i) => {
+                if (c.key === "acao") {
+                  return (
+                    <View key={`${p.id}-acao`} style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}>
+                      <Pressable
+                        style={[Style.buttonSecondary, styles.btnSmall, styles.shadow, styles.tratar]}
+                        onPress={() => { setSelected(p); setTreatOpen(true); }}
+                      >
+                        <Text style={Style.textButtonSecondary}>Tratar</Text>
+                      </Pressable>
+                    </View>
+                  );
+                }
+                const val = c.key === "concluido" ? (p.concluido ? "Sim" : "Não") : String((p as any)[c.key] ?? "");
                 return (
-                  <View key={`${p.id}-acao`} style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}>
-                    <Pressable
-                      style={[Style.buttonSecondary, styles.btnSmall, styles.shadow, styles.tratar]}
-                      onPress={() => { setSelected(p); setTreatOpen(true); }}
-                    >
-                      <Text style={Style.textButtonSecondary}>Tratar</Text>
-                    </Pressable>
+                  <View key={`${p.id}-${c.key}`} style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}>
+                    <CellText text={val} />
                   </View>
                 );
-              }
-              const val = c.key === "concluido" ? (p.concluido ? "Sim" : "Não") : String((p as any)[c.key] ?? "");
-              return (
-                <View key={`${p.id}-${c.key}`} style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}>
-                  <CellText text={val} />
-                </View>
-              );
-            })}
-          </View>
-        ))}
-      </View>
+              })}
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 
@@ -197,7 +198,8 @@ const Pedidos: React.FC = () => {
       <TratarPedidoModal
         visible={treatOpen}
         pedidoId={selected?.id ?? null}
-        onClose={() => { setTreatOpen(false); setSelected(null); }}
+        onClose={() => { setTreatOpen(false); setSelected(null);load(); }}
+        inHistorico={false}
       />
     </View>
   );
@@ -246,7 +248,7 @@ const styles = StyleSheet.create({
 
   dataRow: {
     flexDirection: "row", minHeight: ROW_H, alignItems: "center",
-    borderBottomWidth: 1, borderColor: ROW_BORDER,
+    borderBottomWidth: 1, borderColor: ROW_BORDER
   },
   dataCell: { paddingHorizontal: 13, justifyContent: "center", alignItems: "flex-start" },
   cellText: { color: "#111" },

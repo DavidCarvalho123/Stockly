@@ -3,7 +3,7 @@ import { LoginForm, Token } from "@/models/Login";
 import { InventoryForm, InventoryMobileForm } from "@/models/Stocks";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const baseUrl = 'http://192.168.1.81:8082/api/';
+const baseUrl = 'http://192.168.1.117:8082/api/';
 
 export const Login = async (loginForm:LoginForm) => {
   var results: Response = new Response();
@@ -426,6 +426,52 @@ export const GetProdutoByEAN = async (ean: string) => {
   }
 };
 
+export const GetLinhasByPedido = async (pedidoId: number) => {
+  var results: any = [];
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (auth !== null) {
+    const tokenObj = JSON.parse(auth) as Token;
+    await fetch(baseUrl + `Pedidos/GetLinhasByPedido/${pedidoId}`, {
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    })
+      .then((resp) => resp.json())
+      .then((json) => (results = json))
+      .catch((error) => console.error(error));
+  }
+  return results;
+}
+
+export const GetPedidoByLinha = async (linhaPedidoId: number) => {
+  var results: any = [];
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (auth !== null) {
+    const tokenObj = JSON.parse(auth) as Token;
+    await fetch(baseUrl + `Pedidos/GetPedidoByLinha/${linhaPedidoId}`, {
+      headers: { Authorization: "Bearer " + tokenObj.token },
+    })
+      .then((resp) => resp.json())
+      .then((json) => (results = json))
+      .catch((error) => console.error(error));
+  }
+  return results;
+}
+
+export const ProcessLines = async (pedidoId: number, payload: LinhaForm[]) => {
+  const auth = await AsyncStorage.getItem("jwtToken");
+  if (!auth) throw new Error("Token não encontrado. Faça login novamente.");
+  const tokenObj = JSON.parse(auth) as { token: string };
+
+  const resp = await fetch(baseUrl + `Pedidos/ProcessLines/${pedidoId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + tokenObj.token,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return await resp;
+}
 
 export const GetNextPedidoNumero = async () => {
   let numero = 1;
@@ -469,7 +515,7 @@ export const CreatePedido = async (payload: CreatePedidoPayload) => {
 };
 
 // -------- Pedidos: listar --------
-import type { PedidosTransferencia } from "@/models/Pedidos";
+import type { LinhaForm, PedidosTransferencia } from "@/models/Pedidos";
 
 export const GetAllPedidos = async (): Promise<PedidosTransferencia[]> => {
   let results: PedidosTransferencia[] = [];
@@ -503,3 +549,20 @@ export const GetAllPedidos = async (): Promise<PedidosTransferencia[]> => {
   }
   return results;
 };
+
+// -------------------------------------
+
+// ------------- Historico -------------
+
+export const GetAllHistorico = async () => {
+  var results: any = '';
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Historico/GetAllHistorico', {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                    .then((resp) => resp.json())
+                    .then((json) => results = json)
+                    .catch((error) => console.error(error));
+    }
+  return results;
+}

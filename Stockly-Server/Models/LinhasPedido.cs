@@ -27,6 +27,7 @@ public partial class LinhasPedido
     public virtual Estado? EstadoInicialNavigation { get; set; }
     
     public virtual Estado? EstadoFinalNavigation { get; set; }
-    
-  
+    public virtual ICollection<HistoricoStock> HistoricoStocks { get; set; } = new List<HistoricoStock>();
+
+
 }

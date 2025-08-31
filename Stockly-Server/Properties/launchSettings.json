@@ -1,4 +1,4 @@
-﻿{
+{
   "profiles": {
     "http": {
       "commandName": "Project",
@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://192.168.1.81:8082"
+      "applicationUrl": "http://192.168.1.117:8082"
     },
     "IIS Express": {
       "commandName": "IISExpress",

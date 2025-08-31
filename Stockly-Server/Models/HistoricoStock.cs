@@ -17,5 +17,8 @@ public partial class HistoricoStock
 
     public DateTime? Data { get; set; }
 
+    public int? IdLinhaPedido { get; set; }
+
+    public virtual LinhasPedido? IdLinhaPedidoNavigation { get; set; }
     public virtual StocksPorEstado? IdStockEstadoNavigation { get; set; }
 }

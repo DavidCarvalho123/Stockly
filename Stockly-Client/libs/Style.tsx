@@ -30,7 +30,9 @@ export default StyleSheet.create({
     textButtonPrimary:{
         textAlign: 'center',
         fontSize: 14,
-        fontWeight:'400'
+        fontWeight:'400',
+        paddingLeft: 10,
+        paddingRight: 10
     },
     textButtonSecondary:{
         textAlign: 'center',

@@ -57,10 +57,7 @@ const Sidebar: React.FC<Props> = ({ parentStyle, updateComponent }) => {
                     <Text style={styles.categories}>
                         Administrador
                     </Text>
-
-                    <Pressable style={Style.buttonPrimary} onPress={updateComponent("Gestão de Utilizadores")}>
-                        <Text style={Style.textButtonPrimary}>Gestão de Utilizadores</Text>
-                    </Pressable>
+                    
                     <Pressable style={Style.buttonPrimary} onPress={updateComponent("Historico de Transferencias")}>
                         <Text style={Style.textButtonPrimary}>Histórico de Transferências</Text>
                     </Pressable>

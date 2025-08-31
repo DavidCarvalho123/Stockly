@@ -137,6 +137,11 @@ public partial class StocklyContext : IdentityDbContext<Utilizadore, Acesso, int
                 .HasForeignKey(d => d.IdStockEstado)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("historicostocks_ibfk_1");
+
+            entity.HasOne(d => d.IdLinhaPedidoNavigation).WithMany(p => p.HistoricoStocks)
+                .HasForeignKey(d => d.IdLinhaPedido)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("historicostocks_ibfk_2");
         });
 
         modelBuilder.Entity<LinhasPedido>(entity =>

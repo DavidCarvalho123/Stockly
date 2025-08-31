@@ -1,6 +1,6 @@
 import { FurnitureTypes, renderedObjectsToSave, TreeLocals } from '@/models/Localizacoes';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { MapControls, Stats, useProgress } from "@react-three/drei";
+import { MapControls, useProgress } from "@react-three/drei";
 import { Canvas, ThreeElements } from '@react-three/fiber';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
@@ -206,7 +206,7 @@ const MainViewEditable =
                                   objToRender={ref.obj} dragControl={dynamicObjectDrag} activeDragId={activeDragId} 
                                   setActiveDragId={setActiveDragId} isDbLoaded={true}/>
                   ))}
-                  <Stats/>
+                  
                 </Suspense>
             </Canvas>
         </View>

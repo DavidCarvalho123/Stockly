@@ -18,7 +18,7 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
   const { camera } = useThree();
   const PAN_SPEED = 0.05;
   const MIN_FACTOR = 0.5; // can zoom in to 25% of start altitude (4x closer)
-  const MAX_FACTOR = 2;    // can zoom out to 4x of start altitude
+  const MAX_FACTOR = 1.2;    // can zoom out to 4x of start altitude
 
   const MinZoom = camera.position.z * MIN_FACTOR;
   const MaxZoom = camera.position.z * MAX_FACTOR;
@@ -40,13 +40,13 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
     }
     
     console.log(rotation.value)
-    if(rotation.value !== prevRot.current){
+    /*if(rotation.value !== prevRot.current){
       prevRot.current = rotation.value
       RotActive.current = true;
     }
     else
       RotActive.current = false;
-    camera.rotation.set(-2.6,rotation.value,-2.9)
+    camera.rotation.set(-2.6,rotation.value,-2.9)*/
     
 
     /*if (rotationX.value !== 0 || rotationY.value !== 0) {
