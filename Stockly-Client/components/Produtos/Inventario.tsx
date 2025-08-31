@@ -435,11 +435,11 @@ const Inventario:React.FC = () => {
             <View style={{flex:1}}>
               
                 <View style={dropdownStyles.container}>
-                  <Text style={[dropdownStyles.label, focusedField === 'localizacoes' && { color: 'blue' }]}>
+                  <Text style={[dropdownStyles.label, focusedField === 'localizacoes' && { color: Colours.stocklyBlue }]}>
                     Localização
                   </Text>
                   <Dropdown
-                    style={[dropdownStyles.dropdown, focusedField === 'localizacoes' && { borderColor: 'blue' }]}
+                    style={[dropdownStyles.dropdown, focusedField === 'localizacoes' && { borderColor: Colours.stocklyBlue }]}
                     placeholderStyle={dropdownStyles.placeholderStyle}
                     placeholder="Selecionar Localização"
                     selectedTextStyle={dropdownStyles.selectedTextStyle}
@@ -458,11 +458,11 @@ const Inventario:React.FC = () => {
                   {localError && <Text style={styles.errorText}>É necessário selecionar uma localização</Text>}
                 </View>
                 <View style={[dropdownStyles.container,{paddingBottom: 24}]}>
-                  <Text style={[dropdownStyles.label, focusedField === 'estado' && { color: 'blue' }]}>
+                  <Text style={[dropdownStyles.label, focusedField === 'estado' && { color: Colours.stocklyBlue }]}>
                     Estado
                   </Text>
                   <Dropdown
-                    style={[dropdownStyles.dropdown, focusedField === 'estado' && { borderColor: 'blue' }]}
+                    style={[dropdownStyles.dropdown, focusedField === 'estado' && { borderColor: Colours.stocklyBlue }]}
                     placeholderStyle={dropdownStyles.placeholderStyle}
                     placeholder="Selecionar Estado"
                     selectedTextStyle={dropdownStyles.selectedTextStyle}

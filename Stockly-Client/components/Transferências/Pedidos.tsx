@@ -14,7 +14,6 @@ import {
   TextInput,
   View
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // ---- Definição das colunas (web) ----
 const COLS: { key: keyof PedidosTransferencia | "acao"; label: string; flex: number; filterable?: boolean }[] = [
@@ -178,7 +177,7 @@ const Pedidos: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       {/* Botão Criar Pedido */}
       <View>
         <Pressable style={[Style.buttonSecondary, styles.btnCreate, styles.shadow]} onPress={() => setCreateOpen(true)}>
@@ -200,7 +199,7 @@ const Pedidos: React.FC = () => {
         pedidoId={selected?.id ?? null}
         onClose={() => { setTreatOpen(false); setSelected(null); }}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

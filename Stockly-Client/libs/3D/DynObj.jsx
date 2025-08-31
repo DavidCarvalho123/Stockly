@@ -1,12 +1,14 @@
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useState } from 'react';
 import * as THREE from "three";
+import { Rack } from "./Rack";
 import { Table } from "./Table";
 
 
 
 export default function DraggableObj({id, nodeProps, dragControl, refProp, otherRefs, objToRender, activeDragId, setActiveDragId, isDbLoaded}) {
   const { camera, gl } = useThree();
+  console.log(camera.rotation);
   const [dragging, setDragging] = useState(false);
 
   const raycaster = useMemo(() => new THREE.Raycaster(), []);
@@ -71,7 +73,7 @@ export default function DraggableObj({id, nodeProps, dragControl, refProp, other
         
         if (raycaster.ray.intersectPlane(plane, intersect)) {
           intersect.y = objToRender.sizeY/2;
-          clampToPlane(intersect, nodeProps.sizeX, nodeProps.sizeZ, objToRender.sizeX / 2, objToRender.sizeZ/2, refProp.current.rotation.y);
+          clampToPlane(intersect, nodeProps.sizeX, nodeProps.sizeZ, objToRender.name == 'mesa' ? objToRender.sizeX / 2 : objToRender.sizeX * 5, objToRender.name == 'mesa' ? objToRender.sizeZ/2 : objToRender.sizeZ * 5, refProp.current.rotation.y);
   
           const thisSize = new THREE.Vector3();
           new THREE.Box3().setFromObject(refProp.current).getSize(thisSize);
@@ -117,7 +119,6 @@ export default function DraggableObj({id, nodeProps, dragControl, refProp, other
       }
     };
     const handleUp = (e) => {
-      console.log(e);
       if (activeDragId === id) {
         if(e.shiftKey){
           const current = refProp.current.rotation.y;
@@ -148,6 +149,16 @@ export default function DraggableObj({id, nodeProps, dragControl, refProp, other
          targetSize={ [objToRender.sizeX, objToRender.sizeY, objToRender.sizeZ]}
        />
      );
+   }
+   else if(objToRender.name === 'rack'){
+    return(
+      <Rack ref={refProp}
+         position={isDbLoaded ? refProp.current.position : [-objToRender.sizeX*5, objToRender.sizeY*6, -objToRender.sizeZ*5]}
+         rotation={isDbLoaded ? refProp.current.rotation : [0,0,0]}
+         onPointerDown={() => {setDragging(true);dragControl(false);setActiveDragId(id);}}
+         targetSize={ [objToRender.sizeX, objToRender.sizeY, objToRender.sizeZ]}
+      />
+    );
    }
   /*return (
     <mesh

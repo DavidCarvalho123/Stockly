@@ -37,7 +37,8 @@ const Loader = () => {
     );
 }
 const furniture:FurnitureTypes[] = [
-  {name: 'mesa', sizeX: 100,sizeY:70, sizeZ:70,renderColour:'orange'}
+  {name: 'mesa', sizeX: 100,sizeY:70, sizeZ:70,renderColour:'orange'},
+  {name: 'rack', sizeX: 5,sizeY:10, sizeZ:10,renderColour:'red'}
 ];
 interface renderedObjects {
   refState: React.RefObject<any>,
@@ -124,7 +125,7 @@ const MainViewEditable =
             obj: notSavObj.obj,
             localPai:treeData?.id,
             position:{x:notSavObj.refState.current.position.x, y:notSavObj.refState.current.position.y, z:notSavObj.refState.current.position.z},
-            rotation: notSavObj.refState.current.rotation.y
+            rotation: notSavObj.refState.current.rotation.y?? 0
           });
         })
         let result = await PostGraphicalChanges(graphicalChanges);
@@ -152,16 +153,27 @@ const MainViewEditable =
     const newRef = { current: null } as React.RefObject<any>;
     setNotSavedObjs( [...notSavedObjs,{ refState: newRef, obj: furniture[0] }] );
   }
+  const addDynObjRack = () => {
+    const newRef = { current: null } as React.RefObject<any>;
+    setNotSavedObjs( [...notSavedObjs,{ refState: newRef, obj: furniture[1] }] );
+  }
   // ---------------
   
   if(treeData != undefined){
     return (
       <View style={{flex:1,flexDirection:"column"}}>
         <View style={style.toolbar}>
-          <View>
-            <AntDesign style={[Style.buttonPrimary, style.buttonFurniture, {opacity:isProcessing ? 0.5 : 1}]} name="plus" size={18} color="black" disabled={isProcessing} onPress={addDynObjTable}>
-              <Text style={Style.textButtonPrimary}>Adicionar mesa</Text>
-            </AntDesign>
+          <View style={{flexDirection: 'row', gap: 15}}>
+            <View>
+              <AntDesign style={[Style.buttonPrimary, style.buttonFurniture, {opacity:isProcessing ? 0.5 : 1}]} name="plus" size={18} color="black" disabled={isProcessing} onPress={addDynObjTable}>
+                <Text style={Style.textButtonPrimary}>Adicionar mesa</Text>
+              </AntDesign>
+            </View>
+            <View>
+              <AntDesign style={[Style.buttonPrimary, style.buttonFurniture, {opacity:isProcessing ? 0.5 : 1}]} name="plus" size={18} color="black" disabled={isProcessing} onPress={addDynObjRack}>
+                <Text style={Style.textButtonPrimary}>Adicionar estante</Text>
+              </AntDesign>
+            </View>
           </View>
 
           <View style={style.formButtons}>
