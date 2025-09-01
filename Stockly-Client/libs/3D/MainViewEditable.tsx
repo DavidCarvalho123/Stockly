@@ -125,7 +125,7 @@ const MainViewEditable =
             obj: notSavObj.obj,
             localPai:treeData?.id,
             position:{x:notSavObj.refState.current.position.x, y:notSavObj.refState.current.position.y, z:notSavObj.refState.current.position.z},
-            rotation: notSavObj.refState.current.rotation.y?? 0
+            rotation: notSavObj.refState.current.rotation.y === null ? 0 : notSavObj.refState.current.rotation.y
           });
         })
         let result = await PostGraphicalChanges(graphicalChanges);
