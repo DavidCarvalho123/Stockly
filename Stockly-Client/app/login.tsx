@@ -32,7 +32,7 @@ const login = () => {
         return (
         <>
          <View style={styles.container}>
-            <View style={[styles.loginForm, Platform.OS == 'web' ? {width:400} : {width:300}]}>
+            <View style={[styles.loginForm, Platform.OS == 'android' ? {height:'60%'} : {height:'50%'}]}>
                 <Text style={Style.StocklyTitle}>Stockly</Text>
                 <View style={[styles.textInputViews,{marginTop: 50}]}>
                     <Controller control={control} rules={{required: true}} 
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     },
     loginForm:{
         backgroundColor: Colours.loginBlue,
-        height: '60%',
         borderRadius: 15,
         boxShadow: '4px 5px 3px 5px rgb(191 191 191);',
         paddingTop: 40
