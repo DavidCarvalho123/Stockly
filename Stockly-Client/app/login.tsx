@@ -32,7 +32,7 @@ const login = () => {
         return (
         <>
          <View style={styles.container}>
-            <View style={[styles.loginForm, Platform.OS !== 'web' ? {height:'60%'} : {height:'50%'}]}>
+            <View style={[styles.loginForm, Platform.OS !== 'web' ? {height:'60%'} : {height:'40%'},Platform.OS == 'web' ? {width:400} : {width:300}]}>
                 <Text style={Style.StocklyTitle}>Stockly</Text>
                 <View style={[styles.textInputViews,{marginTop: 50}]}>
                     <Controller control={control} rules={{required: true}} 
