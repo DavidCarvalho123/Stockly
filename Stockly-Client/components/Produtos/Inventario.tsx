@@ -287,109 +287,111 @@ const Inventario:React.FC = () => {
   
                   <View>
                       <View style={styles.pagePad}>
-                          <View style={styles.tableBox}>
-                              {Header}
-                              {FilterRow}
-                  
-                              {filtered.map((p, idx) => (
-                              <View
-                                  key={p.id}
-                                  style={[
-                                  styles.dataRow,
-                                  idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
-                                  ]}
-                              >
-                                  {COLS.map((c, i) => {
-                                  const val = String((p as any)[c.key] ?? "");
-  
-                                  if(!c.editable){
-                                    return (
-                                        <View
-                                        key={`${p.id}-${c.key}`}
-                                        style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
-                                        >
-                                        <CellText text={val} />
-                                        </View>
-                                    );
-                                  }
-                                  else{
-                                    var stockRowForm = fields.findIndex(f => f.produtoId == p.id);
-                                    if(stockRowForm === -1) return null;
-                                    
-                                    if(c.key == 'stockPic1'){
+                          <ScrollView>
+                            <View style={styles.tableBox}>
+                                {Header}
+                                {FilterRow}
+                    
+                                {filtered.map((p, idx) => (
+                                <View
+                                    key={p.id}
+                                    style={[
+                                    styles.dataRow,
+                                    idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
+                                    ]}
+                                >
+                                    {COLS.map((c, i) => {
+                                    const val = String((p as any)[c.key] ?? "");
+    
+                                    if(!c.editable){
                                       return (
-                                        <Controller 
-                                          control={control}
-                                          name={`values.${stockRowForm}.stockPic1`}
-                                          defaultValue={0}
-                                          rules={{validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),}}
-                                          render={({ field: { onChange, value} }) => (
-                                            <TextInput 
-                                              onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal1`,Number(text) || 0)}} 
-                                              value={value?.toString()?? "0"} 
-                                              keyboardType="numeric" 
-                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
-                                            />
-                                          )}
-                                          />
+                                          <View
+                                          key={`${p.id}-${c.key}`}
+                                          style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
+                                          >
+                                          <CellText text={val} />
+                                          </View>
                                       );
                                     }
-                                    else if(c.key == 'stockPic2'){
-                                      return (
-                                        <Controller 
-                                          control={control}
-                                          name={`values.${stockRowForm}.stockPic2`}
-                                          defaultValue={0}
-                                          render={({ field: { onChange, value} }) => (
-                                            <TextInput 
-                                              onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal2`,Number(text) || 0) }} 
-                                              value={value?.toString()?? "0"} 
-                                              keyboardType="numeric" 
-                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                    else{
+                                      var stockRowForm = fields.findIndex(f => f.produtoId == p.id);
+                                      if(stockRowForm === -1) return null;
+                                      
+                                      if(c.key == 'stockPic1'){
+                                        return (
+                                          <Controller 
+                                            control={control}
+                                            name={`values.${stockRowForm}.stockPic1`}
+                                            defaultValue={0}
+                                            rules={{validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),}}
+                                            render={({ field: { onChange, value} }) => (
+                                              <TextInput 
+                                                onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal1`,Number(text) || 0)}} 
+                                                value={value?.toString()?? "0"} 
+                                                keyboardType="numeric" 
+                                                style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                              />
+                                            )}
                                             />
-                                          )}
-                                          />
-                                      );
+                                        );
+                                      }
+                                      else if(c.key == 'stockPic2'){
+                                        return (
+                                          <Controller 
+                                            control={control}
+                                            name={`values.${stockRowForm}.stockPic2`}
+                                            defaultValue={0}
+                                            render={({ field: { onChange, value} }) => (
+                                              <TextInput 
+                                                onChangeText={(text) => {onChange(Number(text) || 0); setValue(`values.${stockRowForm}.stockReal2`,Number(text) || 0) }} 
+                                                value={value?.toString()?? "0"} 
+                                                keyboardType="numeric" 
+                                                style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                              />
+                                            )}
+                                            />
+                                        );
+                                      }
+                                      else if(c.key == 'stockReal1'){
+                                        return (
+                                          <Controller 
+                                            control={control}
+                                            name={`values.${stockRowForm}.stockReal1`}
+                                            defaultValue={0}
+                                            render={({ field: { onChange, value} }) => (
+                                              <TextInput 
+                                                onChangeText={(text) => onChange(Number(text) || 0)} 
+                                                value={value?.toString()?? "0"} 
+                                                keyboardType="numeric" 
+                                                style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                              />
+                                            )}
+                                            />
+                                        );
+                                      }else if(c.key == 'stockReal2'){
+                                        return (
+                                          <Controller 
+                                            control={control}
+                                            name={`values.${stockRowForm}.stockReal2`}
+                                            defaultValue={0}
+                                            render={({ field: { onChange, value} }) => (
+                                              <TextInput 
+                                                onChangeText={(text) => onChange(Number(text) || 0)} 
+                                                value={value?.toString()?? "0"} 
+                                                keyboardType="numeric" 
+                                                style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
+                                              />
+                                            )}
+                                            />
+                                        );
+                                      }
+    
                                     }
-                                    else if(c.key == 'stockReal1'){
-                                      return (
-                                        <Controller 
-                                          control={control}
-                                          name={`values.${stockRowForm}.stockReal1`}
-                                          defaultValue={0}
-                                          render={({ field: { onChange, value} }) => (
-                                            <TextInput 
-                                              onChangeText={(text) => onChange(Number(text) || 0)} 
-                                              value={value?.toString()?? "0"} 
-                                              keyboardType="numeric" 
-                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
-                                            />
-                                          )}
-                                          />
-                                      );
-                                    }else if(c.key == 'stockReal2'){
-                                      return (
-                                        <Controller 
-                                          control={control}
-                                          name={`values.${stockRowForm}.stockReal2`}
-                                          defaultValue={0}
-                                          render={({ field: { onChange, value} }) => (
-                                            <TextInput 
-                                              onChangeText={(text) => onChange(Number(text) || 0)} 
-                                              value={value?.toString()?? "0"} 
-                                              keyboardType="numeric" 
-                                              style={[styles.input, {width: COL_WIDTHS[i] } as any ]}
-                                            />
-                                          )}
-                                          />
-                                      );
-                                    }
-  
-                                  }
-                                  })}
-                              </View>
-                              ))}
-                          </View>
+                                    })}
+                                </View>
+                                ))}
+                            </View>
+                          </ScrollView>
                       </View>
                   </View>
   

@@ -8,7 +8,7 @@ import { ProdutosManutencao } from "@/models/Produtos";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { FlatList, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -146,79 +146,81 @@ if (Platform.OS === 'web')
 
       {/* Tabela */}
       <View style={styles.pagePad}>
-        <View style={styles.tableBox}>
-          {Header}
-          {FilterRow}
+        <ScrollView>
+          <View style={styles.tableBox}>
+            {Header}
+            {FilterRow}
 
-          {filtered.map((p, idx) => (
-            <View
-              key={p.id}
-              style={[
-                styles.dataRow,
-                idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
-              ]}
-            >
-              {COLS.map((c, i) => {
-           if (c.key === "acao") {
-              return (
-                <View
-                  key={`${p.id}-acao`}
-                  style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
-                >
-                  <View style={styles.actionRow}>
-                    {/* Ver Stock primeiro */}
-                    <Pressable
-                      style={[
-                        Style.buttonSecondary,
-                        styles.btnSmallReset,
-                        styles.btnSmall,
-                        styles.shadow,
-                      ]}
-                      onPress={() => {
-                        setViewStockId(p.id);
-                        setViewStockVisible(true);
-                      }}
-                    >
-                      <Text style={Style.textButtonSecondary}>Ver Stock</Text>
-                    </Pressable>
-
-                    {/* Editar depois, com espaçamento à esquerda */}
-                    <Pressable
-                      style={[
-                        Style.buttonSecondary,
-                        Style.editButton,
-                        styles.btnSmallReset,
-                        styles.btnSmall,
-                        styles.shadow,
-                        { marginLeft: 8 },
-                      ]}
-                      onPress={() => setEditId(p.id)}
-                    >
-                      <Text style={Style.textButtonSecondary}>Editar</Text>
-                    </Pressable>
-                  </View>
-                </View>
-              );
-            }
-
-
-                const val =
-                  c.key === "ativo"
-                    ? (p.ativo ? "Ativo" : "Inativo")
-                    : String((p as any)[c.key] ?? "");
-
+            {filtered.map((p, idx) => (
+              <View
+                key={p.id}
+                style={[
+                  styles.dataRow,
+                  idx % 2 === 0 ? styles.rowEven : styles.rowOdd,
+                ]}
+              >
+                {COLS.map((c, i) => {
+            if (c.key === "acao") {
                 return (
                   <View
-                    key={`${p.id}-${c.key}`}
-                    style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
+                    key={`${p.id}-acao`}
+                    style={[styles.actionCell, { width: COL_WIDTHS[i] } as any]}
                   >
-                    <CellText text={val} />
+                    <View style={styles.actionRow}>
+                      {/* Ver Stock primeiro */}
+                      <Pressable
+                        style={[
+                          Style.buttonSecondary,
+                          styles.btnSmallReset,
+                          styles.btnSmall,
+                          styles.shadow,
+                        ]}
+                        onPress={() => {
+                          setViewStockId(p.id);
+                          setViewStockVisible(true);
+                        }}
+                      >
+                        <Text style={Style.textButtonSecondary}>Ver Stock</Text>
+                      </Pressable>
+
+                      {/* Editar depois, com espaçamento à esquerda */}
+                      <Pressable
+                        style={[
+                          Style.buttonSecondary,
+                          Style.editButton,
+                          styles.btnSmallReset,
+                          styles.btnSmall,
+                          styles.shadow,
+                          { marginLeft: 8 },
+                        ]}
+                        onPress={() => setEditId(p.id)}
+                      >
+                        <Text style={Style.textButtonSecondary}>Editar</Text>
+                      </Pressable>
+                    </View>
                   </View>
                 );
-              })}
-            </View>
-          ))}
-        </View>
+              }
+
+
+                  const val =
+                    c.key === "ativo"
+                      ? (p.ativo ? "Ativo" : "Inativo")
+                      : String((p as any)[c.key] ?? "");
+
+                  return (
+                    <View
+                      key={`${p.id}-${c.key}`}
+                      style={[styles.dataCell, { width: COL_WIDTHS[i] } as any]}
+                    >
+                      <CellText text={val} />
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       </View>
 
       {/* Modais */}

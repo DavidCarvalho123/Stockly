@@ -62,6 +62,7 @@ const ManutencaoLocalizacoes:React.FC = () => {
     const [createVisible, setCreateVisible] = useState(false);
 
     const fetchData = async () => {
+        
         try{
             let data = await GetTreeLocals();
             if(data != null){
