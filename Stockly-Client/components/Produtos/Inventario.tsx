@@ -510,6 +510,9 @@ const Inventario:React.FC = () => {
                                 />
                                 {errorsMobile.values && errorsMobile.values[index]?.ean && <Text style={styles.errorText}>{errorsMobile.values && errorsMobile.values[index]?.ean.message as string}</Text>}
                               </View>
+                                      <TouchableOpacity style={styles.buttonView} onPress={() => {toggleCameraState(index)}}>
+                                            <FontAwesome6 name="barcode" size={24} color="black" />
+                                        </TouchableOpacity>
                                 <View style={[dropdownStyles.container,{width: '40%',paddingLeft: 0,paddingRight: 20, paddingTop: 0}]}>
                                 <Label text="Quantidade" />
                                 <Controller
@@ -518,7 +521,7 @@ const Inventario:React.FC = () => {
                                   name={`values.${index}.quantity`}
                                   render={({ field: { onChange, value, onBlur } }) => {
                                     return(
-                                    <View style={{ display:'flex',flexDirection:'row' }}>
+                                    <View style={{ display:'flex',flexDirection:'row', marginRight: 40 }}>
                                       <TextInput
                                         style={[
                                           styles.input,
@@ -533,9 +536,6 @@ const Inventario:React.FC = () => {
                                         onFocus={() => setFocusedField(`quantity.${index}`)}
                                         keyboardType="numeric"
                                       />
-                                      <TouchableOpacity style={styles.buttonView} onPress={() => {toggleCameraState(index)}}>
-                                            <FontAwesome6 name="barcode" size={24} color="black" />
-                                        </TouchableOpacity>
                                     </View>
                                   )}}
                                 />
@@ -551,7 +551,7 @@ const Inventario:React.FC = () => {
                           <Text style={styles.addLine} numberOfLines={1}>Adicionar Linha...</Text>
                       </TouchableOpacity>
                       <ActivityIndicator size="large" animating={isProcessing} style={{justifyContent: 'center'}}  />
-                      <TouchableOpacity style={[Style.buttonSecondary, shadow, {marginBottom:'auto',marginTop:'auto',height:'auto',justifyContent:'center', marginRight: 30}]} onPress={handleSubmitMobile(onSubmitMobile)}>
+                      <TouchableOpacity style={[Style.buttonSecondary, shadow, {marginBottom:'auto',marginTop:'auto',height:'auto',justifyContent:'center', marginRight: 20}]} onPress={handleSubmitMobile(onSubmitMobile)}>
                           <Text style={styles.textPrimary}>Guardar</Text>
                       </TouchableOpacity>
                     </View>
@@ -640,7 +640,8 @@ const styles = StyleSheet.create({
   },
   buttonView: {
         justifyContent:'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginHorizontal:10
     },
   message: {
     textAlign: 'center',
@@ -741,7 +742,7 @@ addLine: { color: ACCENT, marginTop: 6,fontSize: 16 },
     outlineStyle: "none" as any,
     outlineWidth: 0,
     outlineColor: "transparent",
-    marginRight: 20
+    marginRight: 0
   },
   inputFocused: {
     borderColor: Colours.stocklyBlue,
