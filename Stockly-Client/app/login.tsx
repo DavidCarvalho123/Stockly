@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     },
     loginForm:{
         backgroundColor: Colours.loginBlue,
-        height: '50%',
+        height: '60%',
         borderRadius: 15,
         boxShadow: '4px 5px 3px 5px rgb(191 191 191);',
         paddingTop: 40
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
         borderWidth:1,
         width:250,
         borderRadius: 5,
-        height: 35,
+        height: 40,
         color:'#5f5f5f',
         paddingLeft: 10,
         fontStyle: 'italic'
