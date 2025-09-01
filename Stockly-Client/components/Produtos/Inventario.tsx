@@ -113,7 +113,7 @@ const Inventario:React.FC = () => {
             setLocalizacoes(locals);
             const estsRaw = await GetAllStates();
             const ests: Estado[] = Array.isArray(estsRaw)
-              ? estsRaw.filter(Boolean).map((e: any) => ({
+              ? estsRaw.filter(Boolean).filter((e: any) => e.id < 3 ).map((e: any) => ({
                   id: e.id ?? e.Id,
                   nome: e.Estado ?? e.estado1 ?? e.nome ?? e.Nome ?? `Estado ${e.id ?? e.Id}`,
                 }))
