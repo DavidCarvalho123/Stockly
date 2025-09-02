@@ -36,7 +36,7 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
       var s = scale.value;
       if(s > 1 || s < 1)
         s = 2 - s // reverts zooms
-      camera.position.z = MathUtils.clamp(camera.position.z * s,MaxZoom,MinZoom);
+      camera.position.z = MathUtils.clamp(camera.position.z * (s * 0.01),MaxZoom,MinZoom);
     }
     
     console.log(rotation.value)

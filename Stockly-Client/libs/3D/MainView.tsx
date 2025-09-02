@@ -1,9 +1,10 @@
 import { FurnitureTypes, TreeData, TreeLocals } from "@/models/Localizacoes";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useProgress } from "@react-three/drei/native";
 import { Canvas, ThreeElements } from '@react-three/fiber/native';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSharedValue } from 'react-native-reanimated';
 import * as THREE from 'three';
@@ -66,6 +67,7 @@ const MainView =
   const floorRef = useRef(null!);
   // dynamic objects
   const [dbSavedObjs, setdbSavedObjs] = useState<renderedObjects[]>([]);
+  const [cameraPos, setCameraPos] = useState<THREE.Vector3>(treeData !== undefined ? new THREE.Vector3(-treeData.sizeX/2,500,-treeData.sizeZ) : new THREE.Vector3());
   //const [OrbitControls, events] = useControls('map')
   // ---------------
   
@@ -146,7 +148,7 @@ const MainView =
         </View>
         <View style={{flex:1}}>
           <GestureHandlerRootView>
-            <Canvas shadows={"variance"} style={{backgroundColor:'black'}} camera={{ position:[-treeData.sizeX/2,500,-treeData.sizeZ], near: 0.1, far: 100000  }}>
+            <Canvas shadows={"variance"} style={{backgroundColor:'black'}} camera={{ position: cameraPos, near: 0.1, far: 100000  }}>
                 <Suspense fallback={<Loader/>}>
                   <MobileMapControls panX={panX} panY={panY} scale={scale} rotation={rotation} />
                   <spotLight ref={spotRef}  position={[-treeData.sizeX/2,500,-treeData.sizeZ]} angle={Math.PI} penumbra={1} decay={0} intensity={5} />
@@ -164,7 +166,6 @@ const MainView =
                       )
                     }
                     else if (ref.obj.name == 'rack'){
-
                       return(
                         <Rackmobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
                       );
@@ -173,6 +174,9 @@ const MainView =
                   
                 </Suspense>
             </Canvas>
+            <TouchableOpacity style={{}} onPress={() => setCameraPos(new THREE.Vector3(-treeData.sizeX/2,500,-treeData.sizeZ))}>
+              <MaterialIcons name="center-focus-strong" size={24} color="black" />
+            </TouchableOpacity>
             <GestureDetector gesture={gesture}>
               <View style={StyleSheet.absoluteFill} />
             </GestureDetector>
