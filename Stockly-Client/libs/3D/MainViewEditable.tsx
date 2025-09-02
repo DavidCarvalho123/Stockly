@@ -125,7 +125,7 @@ const MainViewEditable =
             obj: notSavObj.obj,
             localPai:treeData?.id,
             position:{x:notSavObj.refState.current.position.x, y:notSavObj.refState.current.position.y, z:notSavObj.refState.current.position.z},
-            rotation: notSavObj.refState.current.rotation.y === null ? 0 : notSavObj.refState.current.rotation.y
+            rotation: notSavObj.refState.current.rotation.y?? 0
           });
         })
         let result = await PostGraphicalChanges(graphicalChanges);
@@ -137,7 +137,7 @@ const MainViewEditable =
       if(dbSavedObjs.length > 0){
         dbSavedObjs.forEach(async (newObj) => {
           const newVec = newObj.refState.current.position as THREE.Vector3;
-          const newRot = newObj.refState.current.rotation.y;
+          const newRot = newObj.refState.current.rotation.y?? 0;
           if(!newObj.originalPos?.equals(newVec) || newObj.originalRot != newRot){
             let result = await UpdatePosObject({coords: newVec,rotation: newRot},newObj.furnitureId as number);
             if(result.status >= 200 && result.status < 300){
