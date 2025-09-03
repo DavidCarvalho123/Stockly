@@ -4,7 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useProgress } from "@react-three/drei/native";
 import { Canvas, ThreeElements } from '@react-three/fiber/native';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSharedValue } from 'react-native-reanimated';
 import * as THREE from 'three';
@@ -67,7 +67,7 @@ const MainView =
   const floorRef = useRef(null!);
   // dynamic objects
   const [dbSavedObjs, setdbSavedObjs] = useState<renderedObjects[]>([]);
-  const [cameraPos, setCameraPos] = useState<THREE.Vector3>(treeData !== undefined ? new THREE.Vector3(-treeData.sizeX/2,500,-treeData.sizeZ) : new THREE.Vector3());
+  const [cameraPos, setCameraPos] = useState<boolean>(false);
   //const [OrbitControls, events] = useControls('map')
   // ---------------
   
@@ -106,6 +106,7 @@ const MainView =
   const panX = useSharedValue(0);
   const panY = useSharedValue(0);
   const scale = useSharedValue(1);
+  const prevScale = useSharedValue(1);
   const rotation = useSharedValue(0);
   const savedRotation = useSharedValue(1);
 
@@ -119,12 +120,22 @@ const MainView =
 
   const pinchGesture = Gesture.Pinch().onBegin(() => {
     scale.value = 1; // reset at the start
+    prevScale.value = 1;
   })
   .onUpdate((e) => {
-    scale.value = e.scale; // absolute scale since pinch start
+    const raw = e.scale;
+    const delta = raw / prevScale.value;
+
+    // Apply a sensitivity curve (0.5 = less sensitive, 1 = raw, >1 = more sensitive)
+    const sensitivity = 0.1;
+    const adjusted = Math.pow(delta, sensitivity);
+
+    scale.value *= adjusted; // accumulate
+    prevScale.value = raw;
   })
   .onEnd(() => {
     scale.value = 1; // reset after pinch ends
+    prevScale.value = 1;
   });
 
   const rotateGesture = Gesture.Rotation()
@@ -148,9 +159,9 @@ const MainView =
         </View>
         <View style={{flex:1}}>
           <GestureHandlerRootView>
-            <Canvas shadows={"variance"} style={{backgroundColor:'black'}} camera={{ position: cameraPos, near: 0.1, far: 100000  }}>
+            <Canvas shadows={"variance"} style={{backgroundColor:'black'}} camera={{ position: [-treeData.sizeX/2,500,-treeData.sizeZ], near: 0.1, far: 100000  }}>
                 <Suspense fallback={<Loader/>}>
-                  <MobileMapControls panX={panX} panY={panY} scale={scale} rotation={rotation} />
+                  <MobileMapControls panX={panX} panY={panY} scale={scale} rotation={rotation} treeDataVal={treeData} setDefaultPos={cameraPos} callbackDefaultPos={() => setCameraPos(false)} />
                   <spotLight ref={spotRef}  position={[-treeData.sizeX/2,500,-treeData.sizeZ]} angle={Math.PI} penumbra={1} decay={0} intensity={5} />
                   <spotLight ref={spotRef2} position={[-treeData.sizeX,500,-treeData.sizeZ/2]} angle={Math.PI/2} penumbra={1} decay={0} intensity={5} />
                   <spotLight ref={spotRef3} position={[treeData.sizeX/2,500,-treeData.sizeZ/2]} angle={Math.PI} penumbra={1} decay={0} intensity={5} />
@@ -174,13 +185,11 @@ const MainView =
                   
                 </Suspense>
             </Canvas>
-            <TouchableOpacity style={{}} onPress={() => setCameraPos(new THREE.Vector3(-treeData.sizeX/2,500,-treeData.sizeZ))}>
-              <MaterialIcons name="center-focus-strong" size={24} color="black" />
-            </TouchableOpacity>
             <GestureDetector gesture={gesture}>
               <View style={StyleSheet.absoluteFill} />
             </GestureDetector>
           </GestureHandlerRootView>
+          <MaterialIcons style={{width:'auto',position:'absolute', right:15,top:15}} name="center-focus-strong" size={30} color="white" onPress={() => setCameraPos(true)} />
         </View>
       </View>
     )

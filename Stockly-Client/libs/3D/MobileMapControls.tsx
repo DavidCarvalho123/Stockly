@@ -1,3 +1,4 @@
+import { TreeData } from '@/models/Localizacoes';
 import { useFrame, useThree } from '@react-three/fiber/native';
 import React, { useRef } from 'react';
 import Animated from 'react-native-reanimated';
@@ -8,14 +9,24 @@ interface MobileMapControlsProps {
   panY: Animated.SharedValue<number>;
   scale: Animated.SharedValue<number>;
   rotation: Animated.SharedValue<number>;
+  treeDataVal: TreeData;
+  setDefaultPos: boolean;
+  callbackDefaultPos: () => void
 }
 export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
   panX,
   panY,
   scale,
-  rotation
+  rotation,
+  treeDataVal,
+  setDefaultPos,
+  callbackDefaultPos
 }) => {
   const { camera } = useThree();
+  if(setDefaultPos){
+    camera.position.set(-treeDataVal.sizeX/2,500,-treeDataVal.sizeZ);
+    callbackDefaultPos();
+  }
   const PAN_SPEED = 0.05;
   const MIN_FACTOR = 0.5; // can zoom in to 25% of start altitude (4x closer)
   const MAX_FACTOR = 1.2;    // can zoom out to 4x of start altitude
@@ -36,10 +47,10 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
       var s = scale.value;
       if(s > 1 || s < 1)
         s = 2 - s // reverts zooms
-      camera.position.z = MathUtils.clamp(camera.position.z * (s * 0.01),MaxZoom,MinZoom);
+      camera.position.z = MathUtils.clamp(camera.position.z * (s),MaxZoom,MinZoom);
     }
     
-    console.log(rotation.value)
+    
     /*if(rotation.value !== prevRot.current){
       prevRot.current = rotation.value
       RotActive.current = true;
