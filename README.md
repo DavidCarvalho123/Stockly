@@ -1,5 +1,5 @@
 # Stockly
-Projeto Integrador de Lincenciatura em Engenharia Informática
+Projeto Integrador de Licenciatura em Engenharia Informática
 
 ## Descrição Sucinta
 Este projeto será um Sistema para *Gestão de Inventário* que irá realizar a gestão de stocks de produtos para venda.
