@@ -1,4 +1,4 @@
-# Assetly
+# Stockly
 Projeto integrador Engenharia Informática
 
 ## Descrição Sucinta
