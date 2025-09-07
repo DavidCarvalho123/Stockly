@@ -6,8 +6,9 @@ import { Asset } from "expo-asset";
 import React, { useEffect, useRef, useState } from 'react';
 import { Box3, Group, Vector3 } from 'three';
 import { GLTFLoader } from "three-stdlib";
+import { TableGridMobile } from './TableGridMobile';
 
-export function Tablemobile({ targetSize,pos,...props}) {
+export function Tablemobile({ targetSize,pos,product,...props}) {
     const localRef = useRef<Group>(null);
     //const { nodes, materials, scene } = useGLTF(require('../../assets/models/Table_processed.glb'))
     const [gltf, setGltf] = useState(null);
@@ -35,18 +36,21 @@ export function Tablemobile({ targetSize,pos,...props}) {
             const bbox = new Box3().setFromObject(gltf.scene);
             const size = new Vector3();
             bbox.getSize(size);
+            console.log('bbox size')
             console.log(size)
             setScaleVec(new Vector3(
-                targetSize[0] / size.x,
+                targetSize[0] / 3.5,
                 targetSize[1] / 2,
-                targetSize[2] / size.z
+                targetSize[2] / 2.5
             ));
         }
     },[gltf])
 
     if(!gltf) return null;
     return (
-        <primitive object={gltf.scene} scale={scaleVec} {...props}  position={pos.toArray()} />
+        <primitive object={gltf.scene} scale={scaleVec} {...props}  position={pos.toArray()}>
+            <TableGridMobile product={product} scale={[1 / scaleVec.x, 1 / scaleVec.y, 1 / scaleVec.z]} />
+        </primitive>
         /*<group ref={localRef} {...props} position={pos.toArray()}>
             <mesh >
                 <boxGeometry args={targetSize} />

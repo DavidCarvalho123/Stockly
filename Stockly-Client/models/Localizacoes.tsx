@@ -40,6 +40,13 @@ export interface renderedObjectsToSave{
     position: {x:number,y:number,z:number},
     rotation: number
 }
+export interface renderedObjectsToSaveResponse{
+    id: number,
+    obj: FurnitureTypes,
+    localPai: number,
+    position: {x:number,y:number,z:number},
+    rotation: number
+}
 
 export interface localizacaoForm{
     nome: string,
@@ -49,4 +56,13 @@ export interface localizacaoForm{
     armazemCentral: boolean,
     sizeX: number,
     sizeZ: number
+}
+
+export interface groupedStocks{
+    furnitureId: number,
+    quantity: number,
+    departamento: number,
+    productX: number,
+    productY: number,
+    productZ: number
 }

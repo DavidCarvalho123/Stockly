@@ -6,7 +6,7 @@ import { Table } from "./Table";
 
 
 
-export default function DraggableObj({id, nodeProps, dragControl, refProp, otherRefs, objToRender, activeDragId, setActiveDragId, isDbLoaded}) {
+export default function DraggableObj({id, nodeProps, dragControl, refProp, otherRefs, objToRender, activeDragId, setActiveDragId, isDbLoaded, products,furnitureId}) {
   const { camera, gl } = useThree();
   console.log(camera.rotation);
   const [dragging, setDragging] = useState(false);
@@ -147,6 +147,7 @@ export default function DraggableObj({id, nodeProps, dragControl, refProp, other
          rotation={isDbLoaded ? refProp.current.rotation : [0,0,0]}
          onPointerDown={() => {setDragging(true);dragControl(false);setActiveDragId(id);}}
          targetSize={ [objToRender.sizeX, objToRender.sizeY, objToRender.sizeZ]}
+         product={products?.find(p => p.furnitureId == furnitureId)}
        />
      );
    }
@@ -157,6 +158,7 @@ export default function DraggableObj({id, nodeProps, dragControl, refProp, other
          rotation={isDbLoaded ? refProp.current.rotation : [0,0,0]}
          onPointerDown={() => {setDragging(true);dragControl(false);setActiveDragId(id);}}
          targetSize={ [objToRender.sizeX, objToRender.sizeY, objToRender.sizeZ]}
+         product={products?.find(p => p.furnitureId == furnitureId)}
       />
     );
    }

@@ -9,7 +9,7 @@ namespace Stockly_Server.Models;
         public string Departamento { get; set; }
         public string Fornecedor { get; set; }
         public string Unidade { get; set; }
-        public string StockMinimo { get; set; }
+        public int StockMinimo { get; set; }
         public string Altura { get; set; }
         public string Largura { get; set; }
         public string Comprimento { get; set; }

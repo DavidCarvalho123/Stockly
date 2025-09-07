@@ -173,6 +173,19 @@ export const GetStoredGraphics = async (localId:number) => {
     return results;
 }
 
+export const GetExistingStocks = async (localId:number) => {
+    var results: any = '';
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if(auth !== null){
+        const tokenObj = JSON.parse(auth) as Token;
+        await fetch(baseUrl + 'Localizacoes/GetExistingStocks?localId='+localId, {headers:{'Authorization':'Bearer ' + tokenObj.token}})
+                .then((resp) => resp.json())
+                .then((json) => results = json)
+                .catch((error) => console.error(error));
+    }
+    return results;
+}
+
 export const UpdatePosObject = async (newCoords: {coords:{x:number,y:number,z:number}, rotation: number},localId: number) => {
     var results: Response = new Response();
     const auth = await AsyncStorage.getItem('jwtToken');
@@ -282,6 +295,28 @@ export const CriarLocalizacao = async (local: any) => {
     throw error;
   }
 };
+
+export const GetOrganizedStocks = async (furnitureIds: number[], mainLocalId: number) => {
+  try {
+    const auth = await AsyncStorage.getItem('jwtToken');
+    if (!auth) throw new Error('Token não encontrado. Faça login novamente.');
+    const tokenObj = JSON.parse(auth) as { token: string };
+
+    const resp = await fetch(baseUrl + `Localizacoes/GetOrganizedStocks/${mainLocalId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + tokenObj.token
+      },
+      body: JSON.stringify(furnitureIds)
+    });
+
+    return await resp;
+  } catch (error) {
+    console.error('Erro no GetOrganizedStocks:', error);
+    throw error;
+  }
+}
 
 // ---------------------------------
 

@@ -63,6 +63,39 @@ namespace Stockly_Server.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetExistingStocks")]
+        public IActionResult GetExistingStocks(int localId)
+        {
+            try
+            {
+                using var context = new StocklyContext();
+                var results = new List<GroupedStocks>();
+                int[] furnitureIds = context.Localizacoes.Where(l => l.LocalizacaoPai == localId && l.LocalReal == false).Select(l => l.Id).ToArray();
+                foreach (var f in furnitureIds)
+                {
+                    var locs = context.LocalizacoesProdutos.Where(l => l.IdLocalizacao == f).ToList();
+                    foreach (var loc in locs)
+                    {
+                        results.Add(new GroupedStocks()
+                        {
+                            FurnitureId = f,
+                            Quantity = (int)loc.Quantidade,
+                            Departamento = (int)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).IdDepartamento,
+                            ProductX = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Comprimento,
+                            ProductY = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Altura,
+                            ProductZ = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Largura,
+                        });
+                    }
+                }
+                return Ok(results);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
         [HttpPost]
         [Route("PostGraphicalChanges")]
         public IActionResult PostGraphicalChanges([FromBody] CrenderedObjectsToSave[] data)
@@ -212,6 +245,144 @@ namespace Stockly_Server.Controllers
                 return StatusCode(500, new { message = "Erro ao criar produto", error = ex.Message });
             }
         }
+
+        [HttpPost]
+        [Route("GetOrganizedStocks/{localId}")]
+        public IActionResult GetOrganizedStocks([FromBody] int[] furnitureIds, int localId)
+        {
+            try
+            {
+                using var context = new StocklyContext();
+                Localizaco localMain = context.Localizacoes.Where(l => l.Id == localId).FirstOrDefault();
+                // order in database in table localizacoes produtos, assume its always a total reorganize so ignore whats already in the table
+                List<StocksPorEstado> allStocks = context.StocksPorEstados.Where(s => s.IdLocalizacao == localId && s.Estado == 1).OrderBy(s => s.IdProduto).AsNoTracking().ToList();
+                int sizeXPer = 0;
+                float? currentSlotUsedSize = 0;
+                int numberSlots = 0;
+                int filledSlots = 0;
+
+                int sizeOfLastObject = 0;
+                foreach (int fid in furnitureIds)
+                {
+                    context.LocalizacoesProdutos.Where(l => l.IdLocalizacao == fid).ExecuteDelete();
+                    context.SaveChanges();
+                    Localizaco f = context.Localizacoes.FirstOrDefault(l => l.Id == fid && l.LocalReal == false);
+                    switch (f.Nome)
+                    {
+                        case "mesa":
+                            sizeXPer = 40;
+                            numberSlots = 6;
+                            currentSlotUsedSize = 0;
+                            filledSlots = 0;
+                            break;
+                        case "rack":
+                            sizeXPer = 40;
+                            numberSlots = 40;
+                            currentSlotUsedSize = 0;
+                            filledSlots = 0;
+                            break;
+                    }
+                    foreach(StocksPorEstado stock in allStocks)
+                    {
+                        if (stock.Quantidade <= 0) continue;
+                        Produto prod = context.Produtos.FirstOrDefault(p => p.Id == stock.IdProduto);
+                        if (sizeOfLastObject == 0 && prod.Comprimento > sizeXPer)
+                        {
+                            numberSlots = numberSlots / 2;
+                            // bigger than a single slot, cuts to half the effective slots
+                            if (stock.Quantidade > numberSlots)
+                            {
+                                // more than this rack holds, update to the next iteration
+                                stock.Quantidade = stock.Quantidade - numberSlots;
+                                filledSlots = numberSlots;
+                            }
+                            else
+                            {
+                                filledSlots = (int)stock.Quantidade;
+                                stock.Quantidade = 0;
+                            }
+                            context.LocalizacoesProdutos.Add(new LocalizacoesProduto()
+                            {
+                                IdLocalizacao = fid,
+                                IdStocksPorEstado = stock.Id,
+                                Quantidade = filledSlots
+                            });
+                        }
+                        else
+                        {
+                            // smaller than a slot
+                            int i = 1;
+                            // more than this rack holds, update to the next iteration
+                            for (i = 1; i <= stock.Quantidade; i++)
+                            {
+                                if (i == 1)
+                                {
+                                    currentSlotUsedSize = prod.Comprimento;
+                                }
+                                else
+                                {
+                                    if (currentSlotUsedSize + prod.Comprimento > sizeXPer)
+                                    {
+                                        currentSlotUsedSize = 0;
+                                        filledSlots++;
+                                        i--;
+                                    }
+                                    else
+                                    {
+                                        currentSlotUsedSize += prod.Comprimento;
+                                    }
+                                }
+
+
+                                if (currentSlotUsedSize >= sizeXPer)
+                                {
+                                    currentSlotUsedSize = 0;
+                                    filledSlots++;
+                                }
+                                if (filledSlots == numberSlots)
+                                {
+                                    break;
+                                }
+                            }
+                            stock.Quantidade = stock.Quantidade - (i + 1);
+                            context.LocalizacoesProdutos.Add(new LocalizacoesProduto()
+                            {
+                                IdLocalizacao = fid,
+                                IdStocksPorEstado = stock.Id,
+                                Quantidade = i
+                            });
+                        }
+                        
+                        
+                    if (filledSlots == numberSlots)
+                        break; // rack is full, next furniture
+                    }
+                }
+                context.SaveChanges();
+
+                var results = new List<GroupedStocks>();
+                foreach(var f in furnitureIds)
+                {
+                    var locs = context.LocalizacoesProdutos.Where(l => l.IdLocalizacao == f).ToList();
+                    foreach(var loc in locs)
+                    {
+                        results.Add(new GroupedStocks(){
+                            FurnitureId = f,
+                            Quantity = (int)loc.Quantidade,
+                            Departamento = (int)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).IdDepartamento,
+                            ProductX = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Comprimento,
+                            ProductY = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Altura,
+                            ProductZ = (float)context.Produtos.FirstOrDefault(p => p.Id == context.StocksPorEstados.FirstOrDefault(s => s.Id == loc.IdStocksPorEstado).IdProduto).Largura,
+                        });
+                    }
+                }
+                return Ok(results);
+            }
+            catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
     }
 
     public class LocalizacoesShow
@@ -223,5 +394,15 @@ namespace Stockly_Server.Controllers
         public bool ArmazemCentral { get; set; }
         public float? SizeX { get; set; }
         public float? SizeZ { get; set; }
+    }
+
+    public class GroupedStocks
+    {
+        public int FurnitureId { get; set; }
+        public int Quantity { get; set; }
+        public int Departamento { get; set; }
+        public float ProductX { get; set; }
+        public float ProductY { get; set; }
+        public float ProductZ { get; set; }
     }
 }

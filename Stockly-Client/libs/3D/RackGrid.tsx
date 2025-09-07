@@ -1,0 +1,202 @@
+import { groupedStocks } from "@/models/Localizacoes";
+import React, { JSX, useRef } from "react";
+
+type Props = {
+  product?: groupedStocks | null;
+};
+
+type Cell = {
+  placements: { id: string }[]; // small-box placements (we only need count + unique id)
+  remainingArea: number;
+  occupiedByBig?: boolean; // true if a big box covers the whole cell (or is spanning it)
+};
+
+export const RackGrid: React.FC<Props> = ({ product }) => {
+  if (!product) return null;
+
+  // === Tunables / constants ===
+  const GRID_SIZE = 40; // depth of one grid cell (units)
+  const COLS = 4; // columns per shelf (left↔right)
+  const ROWS = 2; // rows per shelf (front↔back)
+  const SHELF_COUNT = 5; // number of shelves (matches original)
+  const baseZStart = -110; // z coordinate of the *start edge* of cell 0
+  const shelfYBase = 110; // top shelf Y
+  const shelfYStep = -53;  // spacing between shelves (approx from original)
+
+  // center of rack in X/Z (tweak these to match your scene)
+  const RACK_CENTER_X = 40;   // previous code used roughly 25 for X-anchor
+  const RACK_CENTER_Z = -80;  // choose a reasonable center for Z; tweak to match real layout
+
+  const cellArea = GRID_SIZE * GRID_SIZE;
+
+  // Precompute shelf Y coordinates (center of shelf base; we'll add product height/2 later)
+  const shelfYs = Array.from({ length: SHELF_COUNT }, (_, i) => shelfYBase + i * shelfYStep);
+
+  // Internal representation of shelves and grid cell occupancy.
+  // Each cell tracks how many units from its start have been used (used) and remaining capacity.
+  const shelves: Cell[][][] = Array.from({ length: SHELF_COUNT }, () =>
+    Array.from({ length: ROWS }, () =>
+      Array.from({ length: COLS }, () => ({ placements: [], remainingArea: cellArea, occupiedByBig: false }))
+    )
+  );
+
+  const boxes: JSX.Element[] = [];
+
+  // helpers to compute cell center coordinates
+  const cellCenterX = (col: number) => RACK_CENTER_X + (col - (COLS - 1) / 2) * GRID_SIZE;
+  const cellCenterZ = (row: number) => RACK_CENTER_Z + (row - (ROWS - 1) / 2) * GRID_SIZE;
+
+  // Try to place product.quantity identical boxes
+  for (let itemIndex = 0; itemIndex < product.quantity; itemIndex++) {
+    const boxW = product.productX; // X-dimension (width)
+    const boxH = product.productY; // Y-dimension (height)
+    const boxD = product.productZ; // Z-dimension (depth)
+
+    // how many grid cells this box spans in each axis
+    const spanCols = 1; // horizontal cells required
+    const spanRows = Math.ceil(boxW / GRID_SIZE) > 1 ? 1 : 2; // depth cells required
+
+    let placed = false;
+
+    // If box spans more than the available columns/rows, it can't fit on a single shelf
+    if (spanCols > COLS || spanRows > ROWS) {
+      console.warn(
+        `Box #${itemIndex + 1} (W=${boxW}, D=${boxD}) cannot fit on a shelf (needs ${spanCols}×${spanRows} cells)`
+      );
+      continue;
+    }
+
+    // CASE A: Box spans multiple cells (or >1 in any dimension) -> requires contiguous free cells
+    if (spanRows == 1) {
+      outerBig: for (let s = 0; s < SHELF_COUNT && !placed; s++) {
+        for (let rowStart = 0; rowStart < ROWS - spanRows && !placed; rowStart++) {
+          for (let colStart = 0; colStart <= COLS - spanCols && !placed; colStart++) {
+            // Check all cells in the block are fully free (no small placements and not occupiedByBig)
+            let canUse = true;
+            for (let r = rowStart; r < rowStart + spanRows && canUse; r++) {
+              for (let c = colStart; c < colStart + spanCols && canUse; c++) {
+                const cell = shelves[s][r][c];
+                // require cell to be entirely free
+                if (cell.occupiedByBig || cell.placements.length > 0 || cell.remainingArea < cellArea) {
+                  canUse = false;
+                }
+              }
+            }
+
+            if (!canUse) continue;
+
+            // allocate: mark all cells as occupied by this big box
+            for (let r = rowStart; r < rowStart + spanRows; r++) {
+              for (let c = colStart; c < colStart + spanCols; c++) {
+                const cell = shelves[s][r][c];
+                cell.occupiedByBig = true;
+                cell.remainingArea = 0;
+                cell.placements = []; // clear (should already be empty)
+              }
+            }
+
+            // offsets from the cell center
+            const offsetX = -GRID_SIZE / 2 + (colStart + 0.5);
+            const offsetZ = -GRID_SIZE / 2 + (rowStart + 20);
+
+            // compute block center (world coords)
+            const blockCenterX = cellCenterX(rowStart);
+            const blockCenterZ = cellCenterZ(colStart);
+            
+            const posX = blockCenterX - offsetX;
+            const posZ = blockCenterZ - offsetZ + (boxD/1.8*colStart);
+            const posY = shelfYs[s] + boxH / 2; // sit on shelf
+
+            boxes.push(
+              <Box
+                key={`box-${itemIndex}-big-s${s}-r${rowStart}-c${colStart}`}
+                size={[boxW, boxH, boxD]}
+                pos={[posX, posY, posZ]}
+              />
+            );
+
+            placed = true;
+            break outerBig;
+          }
+        }
+      }
+    } else {
+      // CASE B: Box fits in a single cell -> try to pack into a cell (allow multiple per cell)
+      // Determine how many internal slots we can subdivide the cell into (based on integer fit)
+      // (integer fit prevents overlap and arranges multiple same-size boxes in a simple grid inside the cell)
+      const internalCols = Math.max(1, Math.floor(GRID_SIZE / boxW)); // how many boxes side-by-side fit in a cell
+      const internalRows = Math.max(1, Math.floor(GRID_SIZE / boxD)); // how many boxes front-back fit in a cell
+      const capacityPerCell = Math.max(1, internalCols * internalRows);
+
+      outerSmall: for (let s = 0; s < SHELF_COUNT && !placed; s++) {
+        for (let c = 0; c < COLS && !placed; c++) {
+            for (let r = 0; r < ROWS && !placed; r++) {
+                const cell = shelves[s][r][c];
+
+                // if a big box occupies this cell, skip
+                if (cell.occupiedByBig) continue;
+
+                // If there's still capacity (using integer-fit subdivision), place it
+                if (cell.placements.length < capacityPerCell) {
+                const indexInCell = cell.placements.length;
+
+                // compute internal subcell coords
+                const localCol = indexInCell % internalCols;
+                const localRow = Math.floor(indexInCell / internalCols) % internalRows;
+
+                const subW = GRID_SIZE / internalCols;
+                const subD = GRID_SIZE / internalRows;
+
+                // offsets from the cell center
+                const offsetX = -GRID_SIZE / 2 + (localCol + 0.5) * subW;
+                const offsetZ = -GRID_SIZE / 2 + (localRow + 0.5) * subD;
+
+                const centerX = cellCenterX(r);
+                const centerZ = cellCenterZ(c);
+
+                const posX = (centerX + offsetX) 
+                const posZ = (centerZ + offsetZ) + (boxD/1.8*c)
+                const posY = shelfYs[s] + boxH / 2;
+
+                // book-keeping: add placement
+                cell.placements.push({ id: `box-${itemIndex}-s${s}-r${r}-c${c}-i${indexInCell}` });
+                cell.remainingArea = Math.max(0, cell.remainingArea - boxW * boxD);
+
+                boxes.push(
+                    <Box
+                    key={`box-${itemIndex}-s${s}-r${r}-c${c}-i${indexInCell}`}
+                    size={[boxW-5, boxH, boxD]}
+                    pos={[posX, posY, posZ]}
+                    />
+                );
+
+                placed = true;
+                break outerSmall;
+                } // else try next cell
+            }
+        }
+      }
+    }
+
+    if (!placed) {
+      console.warn(`RackGrid2D: could not place box #${itemIndex + 1} (W=${boxW}, D=${boxD}) — rack full`);
+    }
+  }
+  return <>{boxes}</>;
+};
+
+interface boxProps{
+    size: [number,number,number],
+    pos: [number,number,number]
+}
+const Box = ({size,pos}:boxProps) => {
+  const meshRef = useRef(null)
+  return (
+    <mesh 
+    position={pos}
+      ref={meshRef}>
+      <boxGeometry args={size} />
+      <meshStandardMaterial color={'hotpink'} />
+    </mesh>
+  )
+}

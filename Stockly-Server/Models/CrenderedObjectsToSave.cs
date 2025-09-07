@@ -7,6 +7,22 @@
         public Position Position { get; set; }
         public float Rotation { get; set; }
     }
+    public class CrenderedObjectsToSaveResponse
+    {
+        public int Id { get; set; }
+        public FurnitureTypes Obj { get; set; }
+        public int LocalPai { get; set; }
+        public Position Position { get; set; }
+        public float Rotation { get; set; }
+        public CrenderedObjectsToSaveResponse(CrenderedObjectsToSave form, int id)
+        {
+            Id = id;
+            Obj = form.Obj;
+            LocalPai = form.LocalPai;
+            Position = form.Position;
+            Rotation = form.Rotation;
+        }
+    }
     public class Space
     {
         public Position Coords { get; set; }

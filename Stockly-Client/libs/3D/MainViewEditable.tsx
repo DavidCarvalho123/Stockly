@@ -1,4 +1,4 @@
-import { FurnitureTypes, renderedObjectsToSave, TreeLocals } from '@/models/Localizacoes';
+import { FurnitureTypes, groupedStocks, renderedObjectsToSave, TreeLocals } from '@/models/Localizacoes';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { MapControls, useProgress } from "@react-three/drei";
 import { Canvas, ThreeElements } from '@react-three/fiber';
@@ -7,7 +7,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import { Item } from "react-simple-tree-menu";
 import * as THREE from 'three';
 import { Colours } from "../Constants";
-import { GetStoredGraphics, PostGraphicalChanges, UpdatePosObject } from '../Requests';
+import { GetExistingStocks, GetOrganizedStocks, GetStoredGraphics, PostGraphicalChanges, UpdatePosObject } from '../Requests';
 import Style from '../Style';
 import DraggableObj from "./DynObj";
 
@@ -72,6 +72,7 @@ const MainViewEditable =
   // dynamic objects
   const [notSavedObjs, setNotSavedObjs] = useState<renderedObjects[]>([]);
   const [dbSavedObjs, setdbSavedObjs] = useState<renderedObjects[]>([]);
+  const [products, setProducts] = useState<groupedStocks[]>();
   var allDynamicRefs = notSavedObjs.map((r) => r.refState).concat(dbSavedObjs.map((d) => d.refState));
   // ---------------
   
@@ -111,6 +112,10 @@ const MainViewEditable =
             let newObjs = ConvertDbObjects(data);
             setdbSavedObjs(newObjs);
           }
+          let stocks = await GetExistingStocks(treeData?.id);
+          if(stocks != null){
+            setProducts(stocks);
+          }
         }
       }
       fetchData();
@@ -127,10 +132,11 @@ const MainViewEditable =
             position:{x:notSavObj.refState.current.position.x, y:notSavObj.refState.current.position.y, z:notSavObj.refState.current.position.z},
             rotation: notSavObj.refState.current.rotation.y?? 0
           });
+          setdbSavedObjs([...dbSavedObjs, notSavObj]);
+          setNotSavedObjs(notSavedObjs.filter(a => a !== notSavObj))
         })
         let result = await PostGraphicalChanges(graphicalChanges);
         if(result.status >= 200 && result.status < 300){
-            
         }
       }
       // process edited positions
@@ -147,6 +153,20 @@ const MainViewEditable =
         });
       }
       setIsProcessing(false)
+  }
+
+  const organizeStockLayout = async () => {
+    setIsProcessing(true);
+    if(dbSavedObjs.length > 0){
+      const allFurnitureIds = dbSavedObjs.map(d => d.furnitureId as number);
+      console.log(treeData);
+      let result = await GetOrganizedStocks(allFurnitureIds, treeData?.id);
+      if(result.status >= 200 && result.status < 300){
+        const data = await result.json() as groupedStocks[]
+        setProducts(data);
+      }
+    }
+    setIsProcessing(false);
   }
 
   const addDynObjTable = () => {
@@ -176,12 +196,21 @@ const MainViewEditable =
             </View>
           </View>
 
+        <View style={{flexDirection: 'row'}}>
+          <View style={style.formButtons}>
+            <ActivityIndicator size="large" animating={isProcessing}/>
+            <Pressable style={[Style.buttonSecondary, style.saveChanges,{opacity:isProcessing ? 0.5 : 1}]} disabled={isProcessing || notSavedObjs.length > 0} onPress={organizeStockLayout}>
+              <Text style={Style.textButtonSecondary}>Organizar Stock</Text>
+            </Pressable>
+          </View>
+
           <View style={style.formButtons}>
             <ActivityIndicator size="large" animating={isProcessing}/>
             <Pressable style={[Style.buttonSecondary, style.saveChanges,{opacity:isProcessing ? 0.5 : 1}]} disabled={isProcessing} onPress={submit3DUpdates}>
               <Text style={Style.textButtonSecondary}>Guardar Alterações</Text>
             </Pressable>
           </View>
+        </View>
 
         </View>
         <View style={{flex:1}}>
@@ -199,14 +228,14 @@ const MainViewEditable =
                   {notSavedObjs.map((ref, i) => (
                     <DraggableObj id={i} nodeProps={treeData} refProp={ref.refState} otherRefs={allDynamicRefs} 
                                   objToRender={ref.obj} dragControl={dynamicObjectDrag} activeDragId={activeDragId} 
-                                  setActiveDragId={setActiveDragId} isDbLoaded={false}/>
+                                  setActiveDragId={setActiveDragId} isDbLoaded={false} products={products} furnitureId={ref.furnitureId} />
                   ))}
                   {dbSavedObjs.map((ref, i) => (
                     <DraggableObj id={i} nodeProps={treeData} refProp={ref.refState} otherRefs={allDynamicRefs} 
                                   objToRender={ref.obj} dragControl={dynamicObjectDrag} activeDragId={activeDragId} 
-                                  setActiveDragId={setActiveDragId} isDbLoaded={true}/>
+                                  setActiveDragId={setActiveDragId} isDbLoaded={true} products={products} furnitureId={ref.furnitureId} />
                   ))}
-                  
+
                 </Suspense>
             </Canvas>
         </View>

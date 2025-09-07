@@ -6,8 +6,10 @@ import { Asset } from "expo-asset";
 import { useEffect, useRef, useState } from 'react';
 import { Box3, Group, Vector3 } from 'three';
 import { GLTFLoader } from "three-stdlib";
+import { RackGridMobile } from './RackGridMobile';
 
-export function Rackmobile({ targetSize,pos,...props}) {
+export function Rackmobile({ targetSize,pos,product,...props}) {
+    
     const localRef = useRef<Group>(null);
     //const { nodes, materials, scene } = useGLTF(require('../../assets/models/Table_processed.glb'))
     const [gltf, setGltf] = useState(null);
@@ -47,7 +49,10 @@ export function Rackmobile({ targetSize,pos,...props}) {
 
     if(!gltf) return null;
     return (
-        <primitive object={gltf.scene} scale={scaleVec} {...props}  position={[pos.x,0,pos.z]} />
+        <primitive object={gltf.scene} scale={scaleVec} {...props}  position={[pos.x,0,pos.z]}>
+            <RackGridMobile product={product} />
+            
+        </primitive>
         /*<group ref={localRef} {...props} position={pos.toArray()}>
             <mesh >
                 <boxGeometry args={targetSize} />
@@ -72,4 +77,16 @@ export function Rackmobile({ targetSize,pos,...props}) {
         />
         </group>*/
     )
+}
+
+const Box = () => {
+  const meshRef = useRef(null)
+  return (
+    <mesh 
+    position={[2,3,-10]}
+      ref={meshRef}>
+      <boxGeometry args={[40/10,30/10,60/10]} />
+      <meshStandardMaterial color={'hotpink'} />
+    </mesh>
+  )
 }

@@ -1,4 +1,4 @@
-import { FurnitureTypes, TreeData, TreeLocals } from "@/models/Localizacoes";
+import { FurnitureTypes, groupedStocks, TreeData, TreeLocals } from "@/models/Localizacoes";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useProgress } from "@react-three/drei/native";
@@ -9,7 +9,7 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-g
 import { useSharedValue } from 'react-native-reanimated';
 import * as THREE from 'three';
 import { Colours } from "../Constants";
-import { GetStoredGraphics } from "../Requests";
+import { GetExistingStocks, GetStoredGraphics } from "../Requests";
 import Style from "../Style";
 import { MobileMapControls } from "./MobileMapControls";
 import { Rackmobile } from "./Rackmobile";
@@ -68,6 +68,8 @@ const MainView =
   // dynamic objects
   const [dbSavedObjs, setdbSavedObjs] = useState<renderedObjects[]>([]);
   const [cameraPos, setCameraPos] = useState<boolean>(false);
+  const [products, setProducts] = useState<groupedStocks[]>();
+  
   //const [OrbitControls, events] = useControls('map')
   // ---------------
   
@@ -97,6 +99,10 @@ const MainView =
             // prepared for products as children, might need slight class tuning
             let newObjs = ConvertDbObjects(data);
             setdbSavedObjs(newObjs);
+          }
+          let stocks = await GetExistingStocks(treeData?.id);
+          if(stocks != null){
+            setProducts(stocks);
           }
         }
       }
@@ -173,12 +179,12 @@ const MainView =
                   {dbSavedObjs.map((ref, i) => {
                     if(ref.obj.name == 'mesa'){
                       return(
-                        <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
+                        <Tablemobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} product={products?.find(p => p.furnitureId == ref.furnitureId)} />
                       )
                     }
                     else if (ref.obj.name == 'rack'){
                       return(
-                        <Rackmobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} />
+                        <Rackmobile key={i} ref={ref.refState} targetSize={[ref.obj.sizeX, ref.obj.sizeY, ref.obj.sizeZ]} rotation={ref.refState.current.rotation} pos={ref.refState.current.position} product={products?.find(p => p.furnitureId == ref.furnitureId)} />
                       );
                     }
                     })}
