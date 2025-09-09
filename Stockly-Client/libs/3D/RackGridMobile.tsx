@@ -120,6 +120,7 @@ export const RackGridMobile: React.FC<Props> = ({ product }) => {
                 key={`box-${itemIndex}-big-s${s}-r${rowStart}-c${colStart}`}
                 size={[boxW, boxH, boxD]}
                 pos={[posX, posY, posZ]}
+                dep={product.departamento}
               />
             );
 
@@ -186,6 +187,7 @@ export const RackGridMobile: React.FC<Props> = ({ product }) => {
                 key={`box-${itemIndex}-s${s}-r${row}-c${col}-i${indexInCell}`}
                 size={[boxW, boxH, boxD]}
                 pos={[posX, posY, posZ]}
+                dep={product.departamento}
               />
             );
 
@@ -205,16 +207,17 @@ export const RackGridMobile: React.FC<Props> = ({ product }) => {
 
 interface boxProps{
     size: [number,number,number],
-    pos: [number,number,number]
+    pos: [number,number,number],
+    dep: number
 }
-const Box = ({size,pos}:boxProps) => {
+const Box = ({size,pos, dep}:boxProps) => {
   const meshRef = useRef(null)
   return (
     <mesh 
     position={pos}
       ref={meshRef}>
       <boxGeometry args={size} />
-      <meshStandardMaterial color={'hotpink'} />
+      <meshStandardMaterial color={dep == 1 ? '#ffffff' : dep == 2 ? 'hotpink' : dep == 3 ? 'green' : 'blue'}/>
     </mesh>
   )
 }

@@ -307,6 +307,7 @@ namespace Stockly_Server.Controllers
                                 IdStocksPorEstado = stock.Id,
                                 Quantidade = filledSlots
                             });
+                            if (stock.Quantidade == 0) break;
                         }
                         else
                         {
@@ -351,6 +352,7 @@ namespace Stockly_Server.Controllers
                                 IdStocksPorEstado = stock.Id,
                                 Quantidade = i
                             });
+                            break;
                         }
                         
                         

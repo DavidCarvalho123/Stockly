@@ -16,8 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // ---- Definição única das colunas ----
 const COLS: { key: keyof ProdutosManutencao | "acao"; label: string; flex: number; filterable?: boolean }[] = [
   { key: "ean",          label: "EAN",          flex: 1.6, filterable: true },
-  { key: "nome",         label: "Nome",         flex: 2.0, filterable: true },
-  { key: "departamento", label: "Departamento", flex: 2.0, filterable: true },
+  { key: "nome",         label: "Nome",         flex: 2.5, filterable: true },
+  { key: "departamento", label: "Departamento", flex: 1.5, filterable: true },
   { key: "tipoUnidade",  label: "Unidade",      flex: 1.3, filterable: true },
   { key: "precoVenda",   label: "Preço Venda",  flex: 1.1, filterable: true },
   { key: "iva",          label: "IVA",          flex: 0.8, filterable: true },
@@ -224,7 +224,7 @@ if (Platform.OS === 'web')
       </View>
 
       {/* Modais */}
-      <SafeAreaView style={{ flex: 1 }}>
+      <SafeAreaView>
         <CriarProdutoModal
           visible={createVisible}
           onClose={() => {

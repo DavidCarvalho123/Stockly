@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Checkbox } from "react-native-paper";
+import { Colours } from "@/libs/Constants";
+import { CriarProduto, GetAllDepartments, GetAllSuppliers, SetStockMinimo } from "@/libs/Requests";
 import Style from "@/libs/Style";
-import { Controller, useForm } from "react-hook-form";
 import { ProdutoForm } from "@/models/Produtos";
-import { CriarProduto, GetAllSuppliers, GetAllDepartments, SetStockMinimo } from "@/libs/Requests";
+import { Picker } from "@react-native-picker/picker";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -15,8 +16,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Colours } from "@/libs/Constants";
+import { Checkbox } from "react-native-paper";
 
 // sombra cross-platform
 const shadow = {
@@ -311,7 +311,7 @@ const onSubmit = async (formData: ProdutoForm) => {
                   name={f.name as keyof ProdutoForm}
                   rules={{
                     required: f.required ? "Campo obrigatório" : false,
-                    validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),
+                    validate: (v) => (v && isNaN(Number(v.toString().replace(',','.'))) ? "Deve ser numérico" : true),
                   }}
                   render={({ field: { onChange, value, onBlur } }) => (
                     <TextInput

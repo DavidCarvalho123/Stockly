@@ -126,6 +126,7 @@ export const TableGridMobile: React.FC<Props> = ({ product, scale }) => {
                 size={[boxW, boxH, boxD]}
                 pos={[posX, posY, posZ]}
                 scale={scale}
+                dep={product.departamento}
               />
             );
 
@@ -182,6 +183,7 @@ export const TableGridMobile: React.FC<Props> = ({ product, scale }) => {
                     size={[boxW-5, boxH, boxD]}
                     pos={[posX, posY, posZ]}
                     scale={scale}
+                    dep={product.departamento}
                     />
                 );
 
@@ -203,9 +205,10 @@ export const TableGridMobile: React.FC<Props> = ({ product, scale }) => {
 interface boxProps{
     size: [number,number,number],
     pos: [number,number,number],
-    scale: number[]
+    scale: number[],
+    dep: number
 }
-const Box = ({size,pos,scale}:boxProps) => {
+const Box = ({size,pos,scale,dep}:boxProps) => {
   const meshRef = useRef(null)
   return (
     <mesh 
@@ -214,7 +217,7 @@ const Box = ({size,pos,scale}:boxProps) => {
     rotation={[0,Math.PI/2,0]}
       ref={meshRef}>
       <boxGeometry args={[size[0]/2,size[1]/2,size[2]/3]} />
-      <meshStandardMaterial color={'hotpink'} />
+      <meshStandardMaterial color={dep == 1 ? '#ffffff' : dep == 2 ? 'hotpink' : dep == 3 ? 'green' : 'blue'}/>
     </mesh>
   )
 }

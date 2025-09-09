@@ -4,7 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useProgress } from "@react-three/drei/native";
 import { Canvas, ThreeElements } from '@react-three/fiber/native';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSharedValue } from 'react-native-reanimated';
 import * as THREE from 'three';
@@ -195,7 +195,9 @@ const MainView =
               <View style={StyleSheet.absoluteFill} />
             </GestureDetector>
           </GestureHandlerRootView>
-          <MaterialIcons style={{width:'auto',position:'absolute', right:15,top:15}} name="center-focus-strong" size={30} color="white" onPress={() => setCameraPos(true)} />
+          <TouchableOpacity onPress={() => setCameraPos(true)} style={{width:'auto',position:'absolute', right:35,top:35}} >
+            <MaterialIcons style={{width:'auto',position:'absolute'}} name="center-focus-strong" size={30} color="white"  />
+          </TouchableOpacity>
         </View>
       </View>
     )

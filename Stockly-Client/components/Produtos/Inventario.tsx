@@ -261,7 +261,7 @@ const Inventario:React.FC = () => {
       return ( 
           <>
               <View>
-  
+
                   <View style={styles.inputTopSide}>
                       <View style={styles.inputWrapper}>
                           <Label text="Localização" />
@@ -285,9 +285,9 @@ const Inventario:React.FC = () => {
                       </View>
                   </View>
   
-                  <View>
+                  <View style={{maxHeight: '60%'}}>
                       <View style={styles.pagePad}>
-                          <ScrollView>
+                          <ScrollView >
                             <View style={styles.tableBox}>
                                 {Header}
                                 {FilterRow}

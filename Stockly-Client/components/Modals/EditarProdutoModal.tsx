@@ -73,8 +73,8 @@ const EditarProdutoModal: React.FC<Props> = ({ produtoId, visible, onClose }) =>
           altura: produto.altura?.toString() ?? "",
           largura: produto.largura?.toString() ?? "",
           comprimento: produto.comprimento?.toString() ?? "",
-          precoCompra: produto.precoCompra?.toString() ?? "",
-          precoVenda: produto.precoVenda?.toString() ?? "",
+          precoCompra: produto.precoCompra?.toString().replace('.',',') ?? "",
+          precoVenda: produto.precoVenda?.toString().replace('.',',') ?? "",
           iva: produto.iva?.toString() ?? "",
           ativo: !!produto.ativo,
         });
@@ -266,7 +266,7 @@ const onSubmit = async (formData: ProdutoForm) => {
                   name={f.name as keyof ProdutoForm}
                   rules={{
                     required: f.required ? "Campo obrigatório" : false,
-                    validate: (v) => (v && isNaN(Number(v)) ? "Deve ser numérico" : true),
+                    validate: (v) => (v && isNaN(Number(v.toString().replace(",","."))) ? "Deve ser numérico" : true),
                   }}
                   render={({ field: { onChange, value } }) => (
                     <TextInput
@@ -277,7 +277,7 @@ const onSubmit = async (formData: ProdutoForm) => {
                       placeholder="0"
                       keyboardType="numeric"
                       onChangeText={onChange}
-                      value={value as string}
+                      value={(value as string)}
                     />
                   )}
                 />

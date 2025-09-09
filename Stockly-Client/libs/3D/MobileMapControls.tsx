@@ -24,6 +24,7 @@ export const MobileMapControls: React.FC<MobileMapControlsProps> = ({
 }) => {
   const { camera } = useThree();
   if(setDefaultPos){
+    console.log('ye')
     camera.position.set(-treeDataVal.sizeX/2,500,-treeDataVal.sizeZ);
     callbackDefaultPos();
   }
